@@ -23,10 +23,10 @@ class Num01Extractor:
 
         # 정렬 기준: mean_rank_stddev, cluster_R2, cluster_better_than_predict=True 우선, full_predict_R2
         ranked = sorted(filtered, key=lambda x: (
-            x.get("mean_rank_stddev", float("inf")),
             -x.get("cluster_R2", 0),
-            not x.get("cluster_better_than_predict", False),
-            -x.get("full_predict_R2", 0)
+            x.get("mean_rank_stddev", float("inf")),
+            -x.get("full_predict_R2", 0),
+            not x.get("cluster_better_than_predict", False)
         ))
         return ranked
 
