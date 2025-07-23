@@ -1,0 +1,59 @@
+<!-- html/main.html -->
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Libra | Balancing Infrastructure</title>
+  <link rel="stylesheet" href="../css/main.css">
+</head>
+<body>
+
+  <!-- 공통 헤더 -->
+  <div id="header-area"></div><!-- ID 고정 -->
+
+  <!-- Main Content -->
+  <main>
+    <!-- Section 1: Hero Slider -->
+    <section class="section slider" id="hero-slider">
+    <div class="slides" id="slides">
+     <div class="slide"><div class="placeholder-slide">Slide 1 </div></div>
+     <div class="slide"><div class="placeholder-slide">Slide 2 </div></div>
+     <div class="slide"><div class="placeholder-slide">Slide 3 </div></div>
+    </div>
+    <div class="arrow left"  id="prevBtn">&#10094;</div>
+    <div class="arrow right" id="nextBtn">&#10095;</div>
+  </section>
+
+
+
+    <!-- Section 2: Three-Column Links -->
+  <section class="section subgrid" id="quick-links">
+     <div class="sub" id="link-predict-env"><div class="sub-title">환경 점수 예측</div></div>
+     <div class="sub" id="link-convert-score"><div class="sub-title">점수 변환 예측</div></div>
+     <div class="sub" id="link-login-only"><div class="sub-title">로그인 전용</div></div>
+   </section>
+ 
+
+   <!-- Chatbot Window -->
+  <div class="chat-window" id="chatWindow"><!-- ID 고정 -->
+    <div class="chat-header">
+      <span>AI Chat</span>
+      <button id="chatCloseBtn" aria-label="Close">&times;</button>
+    </div>
+    <div class="chat-body" id="chatBody"><!-- ID 고정 -->
+      <!-- 메시지 쌓임 -->
+    </div>
+    <div class="chat-input">
+      <input type="text" id="chatInput" placeholder="메시지를 입력하세요…" />
+      <button id="chatSendBtn">전송</button>
+    </div>
+  </div>
+ </main>
+ 
+<!-- 공통 푸터 -->
+    <div id="footer-area"></div>
+
+  <script src="../js/main.js"></script>
+</body>
+</html>
