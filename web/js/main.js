@@ -4,7 +4,9 @@ window.addEventListener('DOMContentLoaded', () => {
   fetch('../html/header.html').then(r => r.text())
     .then(html => document.getElementById('header-area').innerHTML = html);
   // footer는 직접 <footer> 태그를 main.html에 넣었으므로 fetch 불필요
-
+  document.getElementById('logo-area').addEventListener('click', () => {
+    window.location.href = 'main.html';
+});
   // 2) 슬라이더 로직
   let idx = 0;
   const slides = document.getElementById('slides');
@@ -46,5 +48,13 @@ window.addEventListener('DOMContentLoaded', () => {
   chatSendBtn.addEventListener('click', sendMessage);
   chatInput.addEventListener('keydown', e => {
     if (e.key === 'Enter') { e.preventDefault(); sendMessage(); }
+  });
+});
+
+// 3-컬럼 클릭 페이지1,2,3으로 이동이벤트
+document.querySelectorAll('.sub').forEach(el => {
+  el.addEventListener('click', () => {
+    const url = el.dataset.link;
+    if (url) window.location.href = url;
   });
 });

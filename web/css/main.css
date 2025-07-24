@@ -80,19 +80,83 @@ a { text-decoration: none; color: inherit; }
 .arrow.left  { left:1rem;  }
 .arrow.right { right:1rem; }
 
+
 /* THREE-COLUMN */
-.subgrid { display:flex; width:100vw; height:100vh; }
-.sub { flex:1; position:relative; cursor:pointer; }
-/* .sub:nth-child(1) { background:#add8e6; }
-.sub:nth-child(2) { background:#222; }
-.sub:nth-child(3) { background:#f5a623; } */
-.sub1 { background-image: url('../images/pexels-ivo-rainha-527110-1261180.jpg'); }
-.sub2 { background-image: url('../images/pexels-rickyrecap-1907785.jpg'); }
+.sub1 { background-image: url('../images/pexels-olenkabohovyk-3646172.jpg'); }
+.sub2 { background-image: url('../images/pexels-yuliia-tretynychenko-211350148-11761083.jpg'); }
 .sub3 { background-image: url('../images/pexels-tima-miroshnichenko-9572464.jpg'); }
-.sub-title {
-  position:absolute; bottom:1rem; left:1rem; color:#fff; font-size:1.2rem;
+
+.subgrid { display:flex; width:100%; height:100vh; }
+.sub { flex:1; position:relative; cursor:pointer;  overflow: hidden;
+  background-size: cover; background-position: center;
+  transition: filter .4s ease, transform .4s ease;}
+
+/* 1) Put the background into a ::before layer */
+.sub::before {
+  content: "";
+  position: absolute;
+  inset: 0;                     /* top/right/bottom/left = 0 */
+  background-image: var(--bg);  /* or url(...) directly */
+  background-size: cover;
+  background-position: center;
+  transition: filter .4s ease, transform .4s ease;
+  z-index: 0;                   /* behind the text */
 }
-.sub:hover { opacity:.9; }
+
+/* 2) On hover, blur/brigten only the ::before */
+.sub:hover::before {
+  filter: brightness(50%) blur(2px);
+  transform: scale(1.02);
+}
+
+/*기본 텍스트*/
+.sub-title {
+  position:absolute; 
+  bottom:6rem; 
+  transform: translateX(-50%); /* 텍스트 너비의 절반만큼 왼쪽으로 이동해서 완전 중앙 정렬 */
+  left:50%; /* 부모 가로의 50% 지점 */
+  text-align: center; /* 줄바꿈된 텍스트도 중앙 정렬 */
+  color:#fff; font-size:1.2rem; z-index: 1;   /* above the ::before */
+  text-shadow: 0 0 .5rem rgba(0,0,0,0.7); transition: transform .4s ease, color .4s ease;
+  color: #fff !important;  /* force white */
+}
+/*첫줄 큰글씨*/
+.sub-title-main {
+  font-size: 4rem;
+  font-weight: bold;
+}
+/*둘째줄 작은글씨*/
+.sub-title-sub {
+  font-size: 2rem;
+  opacity: .8;
+}
+
+/*Hover 효과*/
+.sub:hover { 
+  filter: brightness(50%) blur(.2rem);
+  transform: scale(1.02);
+  /* opacity:.9; */ } 
+.sub:hover .sub-title {
+  transform: translateY(-1rem);
+  color: #fff/* 마우스후버글씨칼라 강조 */
+}
+/* 클릭 영역 전체가 링크 */
+.sub:active .sub-title {
+  color: #fff;
+}
+/* 1) 기본 배경 레이어 뒤집기 */
+.sub1::before { transform: scaleX(-1);}
+/* 2) Hover 시에도 반전 + 확대/블러 유지 */
+.sub1:hover::before {
+  filter: brightness(50%) blur(2px);
+  transform: scaleX(-1) scale(1.02);
+}
+.sub2 .sub-title {
+  bottom: 6rem !important;
+  top: auto   !important;
+  color: #fff !important;
+}
+
 
 /* FOOTER */
 #site-footer {
