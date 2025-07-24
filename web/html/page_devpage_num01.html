@@ -1,0 +1,477 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Libra - 피쳐엔지니어링 개발자페이지</title>
+    <link rel="stylesheet" href="../css/style_chartpage_num01.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
+    <style>
+        /* 개발자페이지 전용 스타일 */
+        .developer-nav-item {
+            color: #90caf9 !important;
+            font-size: 0.95rem !important;
+            opacity: 0.8;
+            transition: all 0.3s ease;
+        }
+
+        .developer-nav-item:hover {
+            opacity: 1;
+            background: rgba(144, 202, 249, 0.1) !important;
+        }
+
+        /* 차트 영역 분할 */
+        .chart-split {
+            display: flex;
+            gap: 15px;
+            height: 100%;
+            width: 100%;
+            overflow: hidden;
+        }
+
+        .chart-main {
+            flex: 0 0 75%;
+            background: #f8f9fa;
+            border-radius: 8px;
+            padding: 15px;
+            position: relative;
+            min-width: 0; /* flex 아이템이 축소될 수 있도록 */
+        }
+
+        .chart-side {
+            flex: 0 0 25%;
+            background: #f8f9fa;
+            border-radius: 8px;
+            padding: 12px;
+            position: relative;
+            min-width: 0; /* flex 아이템이 축소될 수 있도록 */
+        }
+
+        .chart-main h4, .chart-side h4 {
+            margin: 0 0 10px 0;
+            color: #42a5f5;
+            font-size: 14px;
+            text-align: center;
+        }
+
+        .chart-canvas-container {
+            position: relative;
+            height: 320px;
+            width: 100%;
+            overflow: hidden;
+        }
+
+        .side-chart-container {
+            position: relative;
+            height: 280px;
+            width: 100%;
+            overflow: hidden;
+        }
+
+        /* 차트 캔버스 크기 제한 */
+        #mainChart, #sideChart {
+            max-width: 100% !important;
+            max-height: 100% !important;
+        }
+
+        /* Y축 옵션 스타일 */
+        .y-axis-options {
+            background: #f8f9fa;
+            border-radius: 8px;
+            padding: 15px;
+            margin-top: 10px;
+            border: 1px solid #e9ecef;
+        }
+
+        .option-group {
+            margin-bottom: 12px;
+        }
+
+        .option-group:last-child {
+            margin-bottom: 0;
+        }
+
+        .option-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-size: 0.9rem;
+            color: #495057;
+            font-weight: 500;
+        }
+
+        .option-input {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 0.9rem;
+        }
+
+        .option-input:focus {
+            border-color: #42a5f5;
+            outline: none;
+            box-shadow: 0 0 0 2px rgba(66, 165, 245, 0.2);
+        }
+
+        .checkbox-group {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .checkbox-group input[type="checkbox"] {
+            margin: 0;
+        }
+
+        /* 데이터 추가 섹션 */
+        .data-addition {
+            border-top: 1px solid #dee2e6;
+            padding-top: 15px;
+            margin-top: 15px;
+        }
+
+        .add-data-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 10px;
+        }
+
+        .add-btn {
+            background: #28a745;
+            color: white;
+            border: none;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+            transition: all 0.3s ease;
+        }
+
+        .add-btn:hover {
+            background: #218838;
+            transform: scale(1.05);
+        }
+
+        .added-data-item {
+            background: white;
+            border: 1px solid #dee2e6;
+            border-radius: 6px;
+            padding: 12px;
+            margin-bottom: 10px;
+            position: relative;
+        }
+
+        .delete-btn {
+            position: absolute;
+            top: 8px;
+            right: 8px;
+            background: #dc3545;
+            color: white;
+            border: none;
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+            transition: all 0.3s ease;
+        }
+
+        .delete-btn:hover {
+            background: #c82333;
+            transform: scale(1.1);
+        }
+
+        .added-data-title {
+            font-size: 0.85rem;
+            color: #6c757d;
+            margin-bottom: 8px;
+            font-weight: 500;
+        }
+
+        /* 에러 메시지 */
+        .error-message {
+            color: #dc3545;
+            background: #f8d7da;
+            border: 1px solid #f5c6cb;
+            padding: 8px 12px;
+            border-radius: 4px;
+            font-size: 0.85rem;
+            margin-top: 5px;
+            display: none;
+        }
+
+        /* 로딩 및 플레이스홀더 */
+        .chart-loading {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(255, 255, 255, 0.9);
+            z-index: 10;
+        }
+
+        .loading-spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #42a5f5;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 10px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .chart-placeholder {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100%;
+            background: #f8f9fa;
+            border: 2px dashed #ddd;
+            border-radius: 8px;
+            color: #666;
+            text-align: center;
+        }
+
+        .placeholder-content {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .placeholder-icon {
+            font-size: 32px;
+            margin-bottom: 5px;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="container">
+            <div class="header-content">
+                <div class="logo" onclick="navigateTo('main')" style="cursor: pointer;">
+                    <div class="logo-icon">
+                        <img src="../images/logo.jpeg" alt="Libra Logo" onerror="this.style.display='none'">
+                    </div>
+                    Libra
+                </div>
+                <nav class="nav-menu">
+                    <a href="#" class="nav-item" onclick="navigateTo('learning')">환경점수예측 분석</a>
+                    <a href="#" class="nav-item" onclick="navigateTo('development')">학습환경 예측</a>
+                    <a href="#" class="nav-item" onclick="navigateTo('myservice')">마이 서비스</a>
+                    <a href="#" class="nav-item developer-nav-item" onclick="navigateTo('developer')">개발자페이지</a>
+                </nav>
+                <button class="login-btn" onclick="navigateTo('mypage')" type="button">
+                    <span class="login-icon">👤</span>
+                    My Page
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <main>
+        <div class="container">
+            <div class="main-layout">
+                <!-- 왼쪽 컨트롤 패널 -->
+                <aside class="control-panel">
+                    <div class="panel-section">
+                        <h3>데이터 설정</h3>
+                        <div class="form-group">
+                            <label for="yearSelect">연도 선택</label>
+                            <select id="yearSelect" onchange="onYearChange()" aria-label="연도 선택">
+                                <option value="전체">전체</option>
+                                <!-- 동적으로 연도 옵션이 추가됨 -->
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="panel-section">
+                        <h3>축 설정</h3>
+                        
+                        <div class="form-group">
+                            <label for="xAxisSelect">X축 선택</label>
+                            <select id="xAxisSelect" onchange="onAxisChange()" aria-label="X축 선택">
+                                <option value="">선택하세요</option>
+                                <!-- 동적으로 컬럼 옵션이 추가됨 -->
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="yAxisSelect">Y축 선택</label>
+                            <select id="yAxisSelect" onchange="onAxisChange()" aria-label="Y축 선택">
+                                <option value="">선택하세요</option>
+                                <!-- 동적으로 컬럼 옵션이 추가됨 -->
+                            </select>
+                        </div>
+
+                        <!-- Y축 옵션 -->
+                        <div class="y-axis-options" id="yAxisOptions" style="display: none;">
+                            <div class="option-group">
+                                <label for="weightInput">가중치</label>
+                                <input type="text" id="weightInput" class="option-input" value="1" onchange="validateWeight()">
+                                <div class="error-message" id="weightError">올바른 실수 값을 입력하세요.</div>
+                            </div>
+
+                            <div class="option-group">
+                                <div class="checkbox-group">
+                                    <input type="checkbox" id="logCheckbox" onchange="onOptionsChange()">
+                                    <label for="logCheckbox">로그함수 적용</label>
+                                </div>
+                            </div>
+
+                            <div class="option-group">
+                                <label for="orderSelect">적용 순서</label>
+                                <select id="orderSelect" class="option-input" onchange="onOptionsChange()">
+                                    <option value="weight_first">가중치 → 로그함수</option>
+                                    <option value="log_first">로그함수 → 가중치</option>
+                                </select>
+                            </div>
+
+                            <!-- 데이터 추가 섹션 -->
+                            <div class="data-addition">
+                                <div class="add-data-header">
+                                    <label>데이터 추가</label>
+                                    <button class="add-btn" onclick="addDataColumn()" title="데이터 추가">+</button>
+                                </div>
+                                <div id="addedDataContainer">
+                                    <!-- 추가된 데이터 항목들이 여기에 동적으로 생성됨 -->
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="panel-section">
+                        <button class="generate-btn" onclick="generateChart()" type="button" id="generateBtn">
+                            차트 생성
+                        </button>
+                    </div>
+
+                    <div class="panel-actions">
+                        <button class="action-btn primary" onclick="exportChart()" type="button" id="exportBtn">
+                            차트 내보내기
+                        </button>
+                        <button class="action-btn secondary" onclick="saveAnalysis()" type="button" id="saveBtn">
+                            분석 저장
+                        </button>
+                    </div>
+                </aside>
+
+                <!-- 오른쪽 차트 영역 -->
+                <section class="chart-area">
+                    <div class="chart-header">
+                        <div class="chart-tabs" role="tablist">
+                            <button class="chart-tab active">피쳐엔지니어링 시각화</button>
+                        </div>
+                    </div>
+
+                    <div class="chart-container">
+                        <div class="chart-split">
+                            <!-- 메인 차트 (80%) -->
+                            <div class="chart-main">
+                                <h4>데이터 분포 (막대그래프)</h4>
+                                <div class="chart-canvas-container">
+                                    <canvas id="mainChart"></canvas>
+                                    <div class="chart-loading" id="mainChartLoading" style="display: none;">
+                                        <div class="loading-spinner"></div>
+                                        <p>차트를 생성하고 있습니다...</p>
+                                    </div>
+                                    <div class="chart-placeholder" id="mainChartPlaceholder">
+                                        <div class="placeholder-content">
+                                            <div class="placeholder-icon">📊</div>
+                                            <h4>메인 차트</h4>
+                                            <p>X축과 Y축을 선택하세요</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- 사이드 차트 (20%) -->
+                            <div class="chart-side">
+                                <h4>상관계수</h4>
+                                <div class="side-chart-container">
+                                    <canvas id="sideChart"></canvas>
+                                    <div class="chart-loading" id="sideChartLoading" style="display: none;">
+                                        <div class="loading-spinner"></div>
+                                        <p>계산 중...</p>
+                                    </div>
+                                    <div class="chart-placeholder" id="sideChartPlaceholder">
+                                        <div class="placeholder-content">
+                                            <div class="placeholder-icon">📈</div>
+                                            <h5>상관계수</h5>
+                                            <p>데이터 분석 후 표시</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="chart-info">
+                        <div class="info-card">
+                            <h4>현재 분석 정보</h4>
+                            <div class="info-grid">
+                                <div class="info-item">
+                                    <span class="label">연도:</span>
+                                    <span class="value" id="currentYear">전체</span>
+                                </div>
+                                <div class="info-item">
+                                    <span class="label">X축:</span>
+                                    <span class="value" id="currentXAxis">-</span>
+                                </div>
+                                <div class="info-item">
+                                    <span class="label">Y축:</span>
+                                    <span class="value" id="currentYAxis">-</span>
+                                </div>
+                                <div class="info-item">
+                                    <span class="label">가중치:</span>
+                                    <span class="value" id="currentWeight">1</span>
+                                </div>
+                                <div class="info-item">
+                                    <span class="label">로그함수:</span>
+                                    <span class="value" id="currentLog">미적용</span>
+                                </div>
+                                <div class="info-item">
+                                    <span class="label">적용순서:</span>
+                                    <span class="value" id="currentOrder">가중치 → 로그함수</span>
+                                </div>
+                                <div class="info-item">
+                                    <span class="label">추가 데이터:</span>
+                                    <span class="value" id="currentAddedData">0개</span>
+                                </div>
+                                <div class="info-item">
+                                    <span class="label">상관계수:</span>
+                                    <span class="value" id="currentCorrelation">-</span>
+                                </div>
+                                <div class="info-item">
+                                    <span class="label">데이터 수:</span>
+                                    <span class="value" id="dataCount">-</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+            </div>
+        </div>
+    </main>
+
+    <script src="../js/script_devpage_num01.js"></script>
+</body>
+</html>

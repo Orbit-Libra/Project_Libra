@@ -3,10 +3,14 @@
 
 // 전역 변수
 let csvData = null;
+let filteredData = null;
+let selectedUniversities = new Set();
 let currentChart = null;
 let chartData = null;
 let currentYear = null;
 let availableYears = [];
+let selectionMode = 'all'; // 'all' 또는 'manual'
+let selectedDataRange = { start: 1, end: 1 };
 
 // 차트 색상 팔레트
 const CHART_COLORS = [
@@ -63,6 +67,9 @@ async function loadCSVData() {
         // 사용 가능한 연도 추출
         extractAvailableYears();
         
+        // 필터 옵션 업데이트
+        updateFilterOptions();
+        
         // 데이터 검증
         const validation = validateData(csvData);
         if (!validation.valid) {
@@ -71,6 +78,10 @@ async function loadCSVData() {
         
         // 연도 셀렉트 박스 초기화
         initializeYearSelect();
+        
+        // 초기 필터 적용하여 데이터 범위 슬라이더 준비
+        selectedDataRange = { start: 1, end: Math.min(50, csvData.length) }; // 기본값: 처음 50개
+        updateDataRangeSliders();
         
         return csvData;
     } catch (error) {
@@ -104,6 +115,49 @@ function extractAvailableYears() {
     
     console.log('CSV에서 감지된 사용 가능한 연도:', availableYears);
     console.log('연도 범위:', availableYears.length > 0 ? `${Math.min(...availableYears)} ~ ${Math.max(...availableYears)}` : '없음');
+}
+
+// 필터 옵션 업데이트
+function updateFilterOptions() {
+    if (!csvData || csvData.length === 0) return;
+    
+    // 각 필터별 고유값 추출
+    const stypValues = new Set();
+    const fndValues = new Set();
+    const rgnValues = new Set();
+    const uscValues = new Set();
+    
+    csvData.forEach(row => {
+        if (row.STYP) stypValues.add(row.STYP);
+        if (row.FND) fndValues.add(row.FND);
+        if (row.RGN) rgnValues.add(row.RGN);
+        if (row.USC) uscValues.add(row.USC);
+    });
+    
+    // 필터 옵션 업데이트
+    updateSelectOptions('stypFilter', Array.from(stypValues).sort());
+    updateSelectOptions('fndFilter', Array.from(fndValues).sort());
+    updateSelectOptions('rgnFilter', Array.from(rgnValues).sort());
+    updateSelectOptions('uscFilter', Array.from(uscValues).sort());
+}
+
+// Select 옵션 업데이트
+function updateSelectOptions(selectId, values) {
+    const select = document.getElementById(selectId);
+    if (!select) return;
+    
+    // 기존 옵션 제거 (전체 옵션 제외)
+    while (select.options.length > 1) {
+        select.remove(1);
+    }
+    
+    // 새 옵션 추가
+    values.forEach(value => {
+        const option = document.createElement('option');
+        option.value = value;
+        option.textContent = value;
+        select.appendChild(option);
+    });
 }
 
 // 연도 셀렉트 박스 초기화
@@ -187,217 +241,194 @@ function generateChart() {
     generateChartFromCSV();
 }
 
-// CSV 데이터로 차트 생성 (수정됨)
-async function generateChartFromCSV() {
-    // CSV 데이터가 없으면 먼저 로드
-    if (!csvData) {
-        showLoading();
-        await loadCSVData();
-        if (!csvData) {
-            hideLoading();
-            return;
-        }
-        hideLoading();
+// 선택 모드 설정
+function setSelectionMode(mode) {
+    selectionMode = mode;
+    
+    const modeBtns = document.querySelectorAll('.mode-btn');
+    modeBtns.forEach(btn => btn.classList.remove('active'));
+    
+    // 클릭된 버튼을 활성화
+    const clickedBtn = Array.from(modeBtns).find(btn => 
+        (mode === 'all' && btn.textContent.includes('필터링 후 전체')) ||
+        (mode === 'manual' && btn.textContent.includes('수동 선택'))
+    );
+    if (clickedBtn) {
+        clickedBtn.classList.add('active');
     }
     
-    const year = document.getElementById('yearSelect').value;
-    currentYear = year;
+    const selector = document.getElementById('universitySelector');
+    const dataRangeGroup = document.getElementById('dataRangeSliderGroup');
     
-    const chartTypeSelect = document.getElementById('chartType');
-    const dataRangeSelect = document.getElementById('dataRange');
+    console.log(`선택 모드 변경: ${mode}`);
     
-    const chartType = chartTypeSelect.value;
-    const dataRange = dataRangeSelect.value;
+    if (mode === 'manual') {
+        // 수동 선택 모드
+        selector.classList.add('active');
+        dataRangeGroup.style.display = 'none';
+        console.log('대학 목록 업데이트 시작...');
+        updateUniversityList();
+        console.log('대학 목록 업데이트 완료');
+    } else {
+        // 전체 모드
+        selector.classList.remove('active');
+        dataRangeGroup.style.display = 'block';
+        selectedUniversities.clear();
+        updateDataRangeSliders();
+    }
     
-    console.log('차트 생성 요청:', { year, chartType, dataRange });
+    updateCurrentInfo();
+}
+
+// 데이터 범위 슬라이더 초기화/업데이트
+function updateDataRangeSliders() {
+    const filtered = applyFilters();
+    const dataCount = filtered.length;
     
-    // 로딩 표시
-    showLoading();
+    const startSlider = document.getElementById('dataStartSlider');
+    const endSlider = document.getElementById('dataEndSlider');
+    const minLabel = document.getElementById('dataMinLabel');
+    const maxLabel = document.getElementById('dataMaxLabel');
+    const countInfo = document.getElementById('dataCountInfo');
     
-    try {
-        // 데이터 처리 (연도별 컬럼 사용)
-        const processedData = processCSVDataForChart(csvData, year, dataRange);
-        
-        if (processedData && processedData.length > 0) {
-            // 차트 생성
-            createChart(processedData, chartType);
-            updateDataCount(processedData.length);
-            
-            // 통계 정보 표시
-            const stats = calculateStatistics(processedData);
-            if (stats) {
-                console.log('통계 정보:', stats);
-                console.log(`점수 범위: ${stats.min}점 ~ ${stats.max}점`);
-            }
-            
-            // 플레이스홀더 숨기기
-            document.getElementById('chartPlaceholder').style.display = 'none';
+    // 필터링된 데이터 개수 표시
+    countInfo.textContent = `필터링된 데이터: ${dataCount}개`;
+    
+    if (dataCount === 0) {
+        // 데이터가 없을 때
+        startSlider.min = 1;
+        startSlider.max = 1;
+        startSlider.value = 1;
+        endSlider.min = 1;
+        endSlider.max = 1;
+        endSlider.value = 1;
+        minLabel.textContent = '1';
+        maxLabel.textContent = '1';
+        document.getElementById('selectedDataRange').textContent = '데이터 없음';
+        return;
+    }
+    
+    // 슬라이더 범위 설정
+    startSlider.min = 1;
+    startSlider.max = dataCount;
+    endSlider.min = 1;
+    endSlider.max = dataCount;
+    
+    // 현재 값이 범위를 벗어나면 조정
+    if (selectedDataRange.start > dataCount) {
+        selectedDataRange.start = 1;
+    }
+    if (selectedDataRange.end > dataCount) {
+        selectedDataRange.end = dataCount;
+    }
+    
+    startSlider.value = selectedDataRange.start;
+    endSlider.value = selectedDataRange.end;
+    
+    // 레이블 업데이트
+    minLabel.textContent = '1';
+    maxLabel.textContent = dataCount.toString();
+    
+    updateSelectedDataRangeDisplay();
+}
+
+// 데이터 슬라이더 변경 이벤트
+function onDataSliderChange() {
+    const startSlider = document.getElementById('dataStartSlider');
+    const endSlider = document.getElementById('dataEndSlider');
+    
+    let startIdx = parseInt(startSlider.value);
+    let endIdx = parseInt(endSlider.value);
+    
+    // 시작이 끝보다 크면 조정
+    if (startIdx > endIdx) {
+        if (event.target.id === 'dataStartSlider') {
+            endIdx = startIdx;
+            endSlider.value = endIdx;
         } else {
-            showError('선택한 조건에 해당하는 데이터가 없습니다.');
+            startIdx = endIdx;
+            startSlider.value = startIdx;
         }
-    } catch (error) {
-        console.error('차트 생성 실패:', error);
-        showError('차트 생성 중 오류가 발생했습니다: ' + error.message);
-    } finally {
-        hideLoading();
     }
-}
-
-// CSV 데이터 처리 (연도별 컬럼 사용하도록 수정)
-function processCSVDataForChart(data, selectedYear, dataRangeType) {
-    // 1단계: 선택된 연도의 점수 컬럼명 생성
-    const scoreColumn = `SCR_EST_${selectedYear}`;
-    console.log(`선택된 연도: ${selectedYear}, 점수 컬럼: ${scoreColumn}`);
     
-    // 2단계: 유효한 데이터만 필터링 (선택된 연도의 점수가 있는 데이터)
-    let validData = data.filter(row => {
-        const scoreValue = row[scoreColumn];
-        return scoreValue !== null && 
-               scoreValue !== undefined && 
-               scoreValue !== '' &&
-               scoreValue !== '-' &&
-               !isNaN(parseFloat(scoreValue)) &&
-               row['SNM']; // 학교명이 있어야 함
-    });
-
-    console.log('유효한 전체 데이터 수:', validData.length);
-
-    // 전체 데이터를 점수 기준으로 정렬하여 전역 변수에 저장 (전체 순위 계산용)
-    globalSortedData = [...validData].sort((a, b) => {
-        const scoreA = parseFloat(a[scoreColumn]) || 0;
-        const scoreB = parseFloat(b[scoreColumn]) || 0;
-        return scoreB - scoreA; // 높은 점수부터 정렬
-    });
-
-    // 3단계: 필터 적용 (범위 선택 전에 먼저 적용)
-    let filteredData = applyFilters(validData);
-    console.log('필터 적용 후 데이터 수:', filteredData.length);
-
-    // 4단계: 필터링된 데이터를 점수 기준으로 정렬 (높은 점수부터)
-    filteredData.sort((a, b) => {
-        const scoreA = parseFloat(a[scoreColumn]) || 0;
-        const scoreB = parseFloat(b[scoreColumn]) || 0;
-        return scoreB - scoreA; // 높은 점수부터 정렬
-    });
-
-    // 5단계: 데이터 범위에 따라 선택
-    let selectedData = [];
-    const topBottomCount = parseInt(document.getElementById('topBottomCount')?.value) || 10;
-    const rangeStart = parseInt(document.getElementById('rangeStart')?.value) || 1;
-    const rangeEnd = parseInt(document.getElementById('rangeEnd')?.value) || rangeStart;
-
-    console.log('데이터 범위 설정:', { dataRangeType, topBottomCount, rangeStart, rangeEnd });
-    console.log('필터링된 데이터 수:', filteredData.length);
-
-    switch(dataRangeType) {
-        case 'top':
-            selectedData = filteredData.slice(0, Math.min(topBottomCount, filteredData.length));
-            console.log(`상위 ${topBottomCount}개 선택됨 (실제: ${selectedData.length}개)`);
-            break;
-        case 'bottom':
-            selectedData = filteredData.slice(-Math.min(topBottomCount, filteredData.length));
-            console.log(`하위 ${topBottomCount}개 선택됨 (실제: ${selectedData.length}개)`);
-            break;
-        case 'range':
-            // 순위는 1부터 시작하므로 인덱스 변환
-            const startIndex = Math.max(1, rangeStart) - 1;  // 1순위 = 0번째 인덱스
-            const endIndex = Math.min(filteredData.length, Math.max(rangeStart, rangeEnd));  // 끝 순위
-            
-            console.log(`범위 계산: ${rangeStart}위~${rangeEnd}위 -> 인덱스 ${startIndex}~${endIndex-1}`);
-            console.log(`필터링된 데이터 수: ${filteredData.length}`);
-            
-            if (startIndex < filteredData.length && endIndex > startIndex) {
-                selectedData = filteredData.slice(startIndex, endIndex);
-                console.log(`${rangeStart}위~${rangeEnd}위 선택됨 (실제: ${selectedData.length}개)`);
-                
-                // 예상 개수와 실제 개수 비교
-                const expectedCount = endIndex - startIndex;
-                console.log(`예상 개수: ${expectedCount}개, 실제 개수: ${selectedData.length}개`);
-            } else {
-                console.log('잘못된 범위 설정 또는 데이터 부족');
-                selectedData = [];
-            }
-            break;
-        default: // 'all'
-            selectedData = filteredData;
-            console.log('전체 데이터 선택됨');
-            break;
-    }
-
-    console.log('최종 선택된 데이터 수:', selectedData.length);
-
-    // 6단계: 사용자가 선택한 정렬 방식 적용
-    const sortOrder = document.getElementById('sortOrder').value;
-    applySorting(selectedData, sortOrder, scoreColumn);
-
-    // 7단계: 차트용 데이터 변환 (동적 순위 계산)
-    return selectedData.map((row, index) => {
-        const score = parseFloat(row[scoreColumn]) || 0;
-        return {
-            university: row['SNM'] || 'Unknown',
-            value: score,
-            styp: row['STYP'] || '',
-            fnd: row['FND'] || '',
-            rgn: row['RGN'] || '',
-            usc: row['USC'] || '',
-            rank: index + 1, // 현재 순위
-            originalRank: getOriginalRank(row, globalSortedData, scoreColumn), // 전체에서의 원래 순위
-            label: `${row['SNM']} (점수: ${score}, 전체 ${getOriginalRank(row, globalSortedData, scoreColumn)}위)`
-        };
-    });
+    selectedDataRange.start = startIdx;
+    selectedDataRange.end = endIdx;
+    
+    updateSelectedDataRangeDisplay();
 }
 
-// 전체 데이터에서의 원래 순위 구하기 (수정됨)
-function getOriginalRank(targetRow, allSortedData, scoreColumn) {
-    // 전체 데이터에서 동일한 학교 찾기
-    for (let i = 0; i < allSortedData.length; i++) {
-        if (allSortedData[i]['SNM'] === targetRow['SNM'] && 
-            Math.abs(parseFloat(allSortedData[i][scoreColumn]) - parseFloat(targetRow[scoreColumn])) < 0.01) {
-            return i + 1;
-        }
+// 화살표 버튼으로 데이터 범위 조절
+function adjustDataRange(type, delta) {
+    const startSlider = document.getElementById('dataStartSlider');
+    const endSlider = document.getElementById('dataEndSlider');
+    const maxValue = parseInt(endSlider.max);
+    
+    if (type === 'start') {
+        let newValue = selectedDataRange.start + delta;
+        newValue = Math.max(1, Math.min(newValue, selectedDataRange.end));
+        selectedDataRange.start = newValue;
+        startSlider.value = newValue;
+    } else if (type === 'end') {
+        let newValue = selectedDataRange.end + delta;
+        newValue = Math.max(selectedDataRange.start, Math.min(newValue, maxValue));
+        selectedDataRange.end = newValue;
+        endSlider.value = newValue;
     }
-    return -1;
+    
+    updateSelectedDataRangeDisplay();
 }
 
-// 전체 데이터 정렬 상태를 저장할 전역 변수
-let globalSortedData = null;
+// 선택된 데이터 범위 표시 업데이트
+function updateSelectedDataRangeDisplay() {
+    const rangeDisplay = document.getElementById('selectedDataRange');
+    const totalCount = parseInt(document.getElementById('dataMaxLabel').textContent) || 0;
+    
+    if (totalCount === 0) {
+        rangeDisplay.textContent = '데이터 없음';
+        return;
+    }
+    
+    const selectedCount = selectedDataRange.end - selectedDataRange.start + 1;
+    rangeDisplay.textContent = `${selectedDataRange.start}번째 ~ ${selectedDataRange.end}번째 (${selectedCount}개)`;
+}
 
-// 필터 적용 함수
-function applyFilters(data) {
+// 필터링 적용 (정렬 방식에 따른 정렬 추가)
+function applyFilters() {
+    if (!csvData) return [];
+    
     const stypFilter = document.getElementById('stypFilter').value;
     const fndFilter = document.getElementById('fndFilter').value;
     const rgnFilter = document.getElementById('rgnFilter').value;
     const uscFilter = document.getElementById('uscFilter').value;
+    const sortOrder = document.getElementById('sortOrder').value;
     
-    console.log('적용된 필터:', { stypFilter, fndFilter, rgnFilter, uscFilter });
-    
-    return data.filter(row => {
-        // 대학유형 필터
-        if (stypFilter !== '전체' && row['STYP'] !== stypFilter) {
-            return false;
-        }
+    // 필터링
+    filteredData = csvData.filter(row => {
+        if (stypFilter !== '전체' && row.STYP !== stypFilter) return false;
+        if (fndFilter !== '전체' && row.FND !== fndFilter) return false;
+        if (rgnFilter !== '전체' && row.RGN !== rgnFilter) return false;
+        if (uscFilter !== '전체' && row.USC !== uscFilter) return false;
         
-        // 설립 필터
-        if (fndFilter !== '전체' && row['FND'] !== fndFilter) {
-            return false;
-        }
-        
-        // 지역 필터
-        if (rgnFilter !== '전체' && row['RGN'] !== rgnFilter) {
-            return false;
-        }
-        
-        // 규모 필터
-        if (uscFilter !== '전체') {
-            if (uscFilter === '기타' && row['USC'] !== '-' && row['USC'] !== '' && row['USC'] !== null) {
-                return false;
-            } else if (uscFilter !== '기타' && row['USC'] !== uscFilter) {
-                return false;
-            }
+        // 현재 연도의 점수가 있는지 확인
+        if (currentYear) {
+            const scoreColumn = `SCR_EST_${currentYear}`;
+            const scoreValue = row[scoreColumn];
+            return scoreValue !== null && 
+                   scoreValue !== undefined && 
+                   scoreValue !== '' &&
+                   scoreValue !== '-' &&
+                   !isNaN(parseFloat(scoreValue)) &&
+                   row['SNM']; // 학교명이 있어야 함
         }
         
         return true;
     });
+    
+    // 정렬 적용
+    const scoreColumn = `SCR_EST_${currentYear}`;
+    applySorting(filteredData, sortOrder, scoreColumn);
+    
+    return filteredData;
 }
 
 // 정렬 적용 함수 (연도별 점수 컬럼 사용)
@@ -430,6 +461,177 @@ function applySorting(data, sortOrder, scoreColumn) {
             });
             break;
     }
+}
+
+// 대학 목록 업데이트
+function updateUniversityList() {
+    const listContainer = document.getElementById('universityList');
+    if (!listContainer) {
+        console.error('universityList 요소를 찾을 수 없습니다.');
+        return;
+    }
+    
+    const filtered = applyFilters();
+    console.log(`필터링된 대학 수: ${filtered.length}개`);
+    
+    // 기존 목록 초기화
+    listContainer.innerHTML = '';
+    
+    if (filtered.length === 0) {
+        listContainer.innerHTML = '<div style="padding: 20px; text-align: center; color: #666;">필터 조건에 맞는 대학이 없습니다.</div>';
+        return;
+    }
+    
+    filtered.forEach((row, index) => {
+        const item = document.createElement('div');
+        item.className = 'university-item';
+        
+        const checkbox = document.createElement('input');
+        checkbox.type = 'checkbox';
+        checkbox.id = `univ_${index}_${row.SNM}`;
+        checkbox.value = row.SNM;
+        checkbox.checked = selectedUniversities.has(row.SNM);
+        checkbox.onchange = () => updateSelectedUniversities();
+        
+        const label = document.createElement('label');
+        label.htmlFor = `univ_${index}_${row.SNM}`;
+        label.textContent = row.SNM || 'Unknown';
+        
+        item.appendChild(checkbox);
+        item.appendChild(label);
+        listContainer.appendChild(item);
+    });
+    
+    updateSelectedCount();
+    console.log('대학 목록 DOM 업데이트 완료');
+}
+
+// 선택된 대학 업데이트
+function updateSelectedUniversities() {
+    selectedUniversities.clear();
+    
+    const checkboxes = document.querySelectorAll('#universityList input[type="checkbox"]:checked');
+    checkboxes.forEach(checkbox => {
+        selectedUniversities.add(checkbox.value);
+    });
+    
+    updateSelectedCount();
+}
+
+// 선택된 개수 업데이트
+function updateSelectedCount() {
+    const countElement = document.getElementById('selectedCount');
+    if (countElement) {
+        countElement.textContent = `${selectedUniversities.size}개 선택됨`;
+    }
+}
+
+// 전체 선택/해제
+function toggleAllUniversities() {
+    const checkboxes = document.querySelectorAll('#universityList input[type="checkbox"]');
+    const allChecked = Array.from(checkboxes).every(cb => cb.checked);
+    
+    checkboxes.forEach(checkbox => {
+        checkbox.checked = !allChecked;
+    });
+    
+    updateSelectedUniversities();
+}
+
+// CSV 데이터로 차트 생성 (수정됨)
+async function generateChartFromCSV() {
+    // CSV 데이터가 없으면 먼저 로드
+    if (!csvData) {
+        showLoading();
+        await loadCSVData();
+        if (!csvData) {
+            hideLoading();
+            return;
+        }
+        hideLoading();
+    }
+    
+    const year = document.getElementById('yearSelect').value;
+    currentYear = year;
+    
+    const chartTypeSelect = document.getElementById('chartType');
+    const chartType = chartTypeSelect.value;
+    
+    console.log('차트 생성 요청:', { year, chartType, selectionMode });
+    
+    // 로딩 표시
+    showLoading();
+    
+    try {
+        // 데이터 처리 (출력 범위 모드에 따라)
+        const processedData = processCSVDataForChart(csvData, year);
+        
+        if (processedData && processedData.length > 0) {
+            // 차트 생성
+            createChart(processedData, chartType);
+            updateDataCount(processedData.length);
+            
+            // 통계 정보 표시
+            const stats = calculateStatistics(processedData);
+            if (stats) {
+                console.log('통계 정보:', stats);
+                console.log(`점수 범위: ${stats.min}점 ~ ${stats.max}점`);
+            }
+            
+            // 플레이스홀더 숨기기
+            document.getElementById('chartPlaceholder').style.display = 'none';
+        } else {
+            showError('선택한 조건에 해당하는 데이터가 없습니다.');
+        }
+    } catch (error) {
+        console.error('차트 생성 실패:', error);
+        showError('차트 생성 중 오류가 발생했습니다: ' + error.message);
+    } finally {
+        hideLoading();
+    }
+}
+
+// CSV 데이터 처리 (출력 범위 모드 적용)
+function processCSVDataForChart(data, selectedYear) {
+    // 1단계: 선택된 연도의 점수 컬럼명 생성
+    const scoreColumn = `SCR_EST_${selectedYear}`;
+    console.log(`선택된 연도: ${selectedYear}, 점수 컬럼: ${scoreColumn}`);
+    
+    // 2단계: 필터 적용 및 정렬
+    let filteredData = applyFilters();
+    console.log('필터 적용 후 데이터 수:', filteredData.length);
+    
+    // 3단계: 출력 범위에 따라 데이터 선택
+    let selectedData = [];
+    
+    if (selectionMode === 'manual' && selectedUniversities.size > 0) {
+        // 수동 선택 모드
+        selectedData = filteredData.filter(row => selectedUniversities.has(row.SNM));
+        console.log(`수동 선택 모드: ${selectedData.length}개 대학 선택됨`);
+    } else {
+        // 전체 모드일 때는 데이터 범위 슬라이더 적용
+        const startIdx = selectedDataRange.start - 1; // 1부터 시작하므로 -1
+        const endIdx = selectedDataRange.end;
+        selectedData = filteredData.slice(startIdx, endIdx);
+        console.log(`전체 모드: ${startIdx + 1}번째~${endIdx}번째 선택됨 (실제: ${selectedData.length}개)`);
+    }
+
+    console.log('최종 선택된 데이터 수:', selectedData.length);
+
+    // 4단계: 차트용 데이터 변환
+    return selectedData.map((row, index) => {
+        const score = parseFloat(row[scoreColumn]) || 0;
+        return {
+            university: row['SNM'] || 'Unknown',
+            value: score,
+            styp: row['STYP'] || '',
+            fnd: row['FND'] || '',
+            rgn: row['RGN'] || '',
+            usc: row['USC'] || '',
+            rank: index + 1, // 현재 순위
+            label: `${row['SNM']} (점수: ${score})`
+        };
+    });
 }
 
 // Y축 범위 계산 함수
@@ -764,6 +966,14 @@ function onYearChange() {
     
     updateCurrentInfo();
     
+    // 데이터 범위 슬라이더 업데이트 (필터와 연도가 바뀌면 데이터가 달라질 수 있으므로)
+    updateDataRangeSliders();
+    
+    // 수동 선택 모드일 때 대학 목록 업데이트
+    if (selectionMode === 'manual') {
+        updateUniversityList();
+    }
+    
     // 차트가 있다면 새로운 연도로 다시 생성
     if (currentChart || csvData) {
         generateChartFromCSV();
@@ -773,6 +983,14 @@ function onYearChange() {
 function onFilterChange() {
     console.log('필터 변경');
     updateCurrentInfo();
+    
+    // 데이터 범위 슬라이더 업데이트
+    updateDataRangeSliders();
+    
+    // 수동 선택 모드일 때 대학 목록 업데이트
+    if (selectionMode === 'manual') {
+        updateUniversityList();
+    }
     
     // 차트가 있다면 새로운 필터로 다시 생성
     if (currentChart && csvData) {
@@ -788,75 +1006,17 @@ function onChartTypeChange() {
     }
 }
 
-// 데이터 범위 변경 이벤트 (수정됨 - 검증 추가)
-function onDataRangeChange() {
-    const dataRange = document.getElementById('dataRange').value;
-    const topBottomCountGroup = document.getElementById('topBottomCountGroup');
-    const rangeGroup = document.getElementById('rangeGroup');
-    const rangeGroupEnd = document.getElementById('rangeGroupEnd');
-    
-    // 모든 그룹 숨기기
-    if (topBottomCountGroup) topBottomCountGroup.style.display = 'none';
-    if (rangeGroup) rangeGroup.style.display = 'none';
-    if (rangeGroupEnd) rangeGroupEnd.style.display = 'none';
-    
-    // 선택된 범위에 따라 해당 입력 필드 표시
-    switch(dataRange) {
-        case 'top':
-        case 'bottom':
-            if (topBottomCountGroup) topBottomCountGroup.style.display = 'block';
-            break;
-        case 'range':
-            if (rangeGroup) rangeGroup.style.display = 'block';
-            if (rangeGroupEnd) rangeGroupEnd.style.display = 'block';
-            
-            // 범위 입력 시 기본값 설정
-            const rangeStartInput = document.getElementById('rangeStart');
-            const rangeEndInput = document.getElementById('rangeEnd');
-            if (rangeStartInput && !rangeStartInput.value) {
-                rangeStartInput.value = '1';
-            }
-            if (rangeEndInput && !rangeEndInput.value) {
-                rangeEndInput.value = '50';
-            }
-            break;
-        // 'all'은 추가 입력 필드 없음
-    }
-    
-    // 범위 검증 (range 모드일 때만)
-    if (dataRange === 'range') {
-        validateRangeInputs();
-    }
-    
-    // 차트가 있다면 새로운 범위로 다시 생성
-    if (currentChart && csvData) {
-        generateChartFromCSV();
-    }
-}
-
-// 범위 입력 검증 함수
-function validateRangeInputs() {
-    const rangeStart = parseInt(document.getElementById('rangeStart')?.value) || 1;
-    const rangeEnd = parseInt(document.getElementById('rangeEnd')?.value) || 50;
-    
-    if (rangeStart < 1) {
-        document.getElementById('rangeStart').value = '1';
-        console.log('시작 순위는 1 이상이어야 합니다.');
-    }
-    
-    if (rangeEnd < rangeStart) {
-        document.getElementById('rangeEnd').value = rangeStart;
-        console.log('끝 순위는 시작 순위보다 크거나 같아야 합니다.');
-    }
-    
-    // 예상 데이터 개수 계산
-    const expectedCount = rangeEnd - rangeStart + 1;
-    console.log(`예상 데이터 개수: ${expectedCount}개 (${rangeStart}위~${rangeEnd}위)`);
-}
-
 function onSortOrderChange() {
     console.log('정렬 방식 변경');
     updateCurrentInfo();
+    
+    // 정렬 방식이 바뀌면 데이터 순서가 바뀌므로 슬라이더 업데이트
+    updateDataRangeSliders();
+    
+    // 수동 선택 모드일 때 대학 목록 업데이트 (정렬이 바뀌므로)
+    if (selectionMode === 'manual') {
+        updateUniversityList();
+    }
     
     if (currentChart && csvData) {
         generateChartFromCSV();
@@ -892,6 +1052,8 @@ function updateCurrentInfo() {
     document.getElementById('currentUsc').textContent = document.getElementById('uscFilter').value;
     document.getElementById('currentChartType').textContent = CHART_TYPE_NAMES[document.getElementById('chartType').value];
     document.getElementById('currentSortOrder').textContent = SORT_ORDER_NAMES[document.getElementById('sortOrder').value];
+    document.getElementById('currentSelectionMode').textContent = 
+        selectionMode === 'manual' ? '수동 선택' : '필터링 후 전체';
     
     // Y축 범위 정보 추가 (안전하게 처리)
     const yAxisModeElement = document.getElementById('yAxisMode');
@@ -945,7 +1107,8 @@ function exportChart() {
         a.href = url;
         const year = currentYear || 'unknown';
         const filters = `${document.getElementById('stypFilter').value}_${document.getElementById('fndFilter').value}_${document.getElementById('rgnFilter').value}_${document.getElementById('uscFilter').value}`;
-        a.download = `libra_environment_chart_${year}_${filters}_${new Date().getTime()}.png`;
+        const mode = selectionMode === 'manual' ? 'manual' : 'auto';
+        a.download = `libra_environment_chart_${year}_${filters}_${mode}_${new Date().getTime()}.png`;
         document.body.appendChild(a);
         a.click();
         document.body.removeChild(a);
@@ -966,7 +1129,13 @@ function saveAnalysis() {
         usc: document.getElementById('uscFilter').value,
         chartType: document.getElementById('chartType').value,
         sortOrder: document.getElementById('sortOrder').value,
-        dataRange: document.getElementById('dataRange').value,
+        selectionMode: selectionMode,
+        dataRange: {
+            start: selectedDataRange.start,
+            end: selectedDataRange.end
+        },
+        selectedUniversities: Array.from(selectedUniversities),
+        yAxisMode: document.getElementById('yAxisMode').value,
         timestamp: new Date().toISOString()
     };
     
@@ -1031,10 +1200,12 @@ function saveFilterState() {
             usc: document.getElementById('uscFilter')?.value || '전체',
             chartType: document.getElementById('chartType')?.value || 'bar',
             sortOrder: document.getElementById('sortOrder')?.value || 'rank_desc',
-            dataRange: document.getElementById('dataRange')?.value || 'all',
-            topBottomCount: document.getElementById('topBottomCount')?.value || '10',
-            rangeStart: document.getElementById('rangeStart')?.value || '',
-            rangeEnd: document.getElementById('rangeEnd')?.value || '',
+            selectionMode: selectionMode,
+            dataRange: {
+                start: selectedDataRange.start,
+                end: selectedDataRange.end
+            },
+            selectedUniversities: Array.from(selectedUniversities),
             yAxisMode: document.getElementById('yAxisMode')?.value || 'enhanced',
             yAxisMin: document.getElementById('yAxisMin')?.value || '',
             yAxisMax: document.getElementById('yAxisMax')?.value || ''
@@ -1063,14 +1234,10 @@ function restoreFilterState() {
             
             // 나머지 필터 상태 복원
             Object.keys(filterState).forEach(key => {
-                if (key === 'year') return; // 연도는 이미 처리함
+                if (key === 'year' || key === 'dataRange' || key === 'selectedUniversities' || key === 'selectionMode') return;
                 
                 const elementId = key === 'chartType' ? 'chartType' : 
                                 key === 'sortOrder' ? 'sortOrder' : 
-                                key === 'dataRange' ? 'dataRange' : 
-                                key === 'topBottomCount' ? 'topBottomCount' :
-                                key === 'rangeStart' ? 'rangeStart' :
-                                key === 'rangeEnd' ? 'rangeEnd' :
                                 key === 'yAxisMode' ? 'yAxisMode' :
                                 key === 'yAxisMin' ? 'yAxisMin' :
                                 key === 'yAxisMax' ? 'yAxisMax' :
@@ -1081,9 +1248,20 @@ function restoreFilterState() {
                 }
             });
             
-            // 데이터 범위에 따라 입력 필드 표시/숨김
-            if (filterState.dataRange && typeof onDataRangeChange === 'function') {
-                onDataRangeChange();
+            // 선택 모드 복원
+            if (filterState.selectionMode) {
+                selectionMode = filterState.selectionMode;
+                setSelectionMode(selectionMode);
+            }
+            
+            // 데이터 범위 복원
+            if (filterState.dataRange) {
+                selectedDataRange = filterState.dataRange;
+            }
+            
+            // 선택된 대학 복원
+            if (filterState.selectedUniversities) {
+                selectedUniversities = new Set(filterState.selectedUniversities);
             }
             
             // Y축 모드에 따라 사용자 지정 입력 필드 표시/숨김
@@ -1154,6 +1332,9 @@ function debugInfo() {
     console.log('CSV 데이터:', csvData ? csvData.length + '행' : '없음');
     console.log('차트 데이터:', chartData ? chartData.length + '개' : '없음');
     console.log('현재 차트:', currentChart ? '있음' : '없음');
+    console.log('선택 모드:', selectionMode);
+    console.log('데이터 범위:', selectedDataRange);
+    console.log('선택된 대학 수:', selectedUniversities.size);
     
     if (csvData && csvData.length > 0) {
         console.log('컬럼명:', Object.keys(csvData[0]));
@@ -1189,6 +1370,9 @@ window.libra = {
     currentChart,
     currentYear,
     availableYears,
+    selectionMode,
+    selectedDataRange,
+    selectedUniversities,
     generateChart,
     loadData: loadCSVData,
     debugInfo,
@@ -1196,7 +1380,7 @@ window.libra = {
     testFilters: function() {
         if (csvData) {
             console.log('전체 데이터 수:', csvData.length);
-            console.log('필터 적용 후:', applyFilters(csvData).length);
+            console.log('필터 적용 후:', applyFilters().length);
         }
     },
     showCSVStructure: function() {
@@ -1224,64 +1408,28 @@ window.libra = {
             }
         }
     },
-    // 모든 연도별 데이터 현황 확인
-    checkAllYearData: function() {
-        if (!csvData || csvData.length === 0) {
-            console.log('CSV 데이터가 없습니다.');
-            return;
-        }
+    // 수동 선택 모드 테스트
+    testManualMode: function() {
+        console.log('수동 선택 모드 테스트');
+        console.log('현재 모드:', selectionMode);
+        console.log('선택된 대학 수:', selectedUniversities.size);
+        console.log('선택된 대학들:', Array.from(selectedUniversities));
         
-        console.log('=== 전체 연도별 데이터 현황 ===');
-        availableYears.forEach(year => {
-            const scoreColumn = `SCR_EST_${year}`;
-            const validCount = csvData.filter(row => {
-                const score = row[scoreColumn];
-                return score !== null && score !== undefined && score !== '' && !isNaN(parseFloat(score));
-            }).length;
-            
-            console.log(`${year}년: ${validCount}개 유효 데이터 (전체 ${csvData.length}개 중)`);
-        });
+        const selector = document.getElementById('universitySelector');
+        const listContainer = document.getElementById('universityList');
+        console.log('selector 표시 상태:', selector ? selector.classList.contains('active') : 'selector 없음');
+        console.log('listContainer 내용:', listContainer ? listContainer.children.length + '개 항목' : 'listContainer 없음');
         
-        // 빈 데이터가 있는 연도들 확인
-        const emptyYears = availableYears.filter(year => {
-            const scoreColumn = `SCR_EST_${year}`;
-            const validCount = csvData.filter(row => {
-                const score = row[scoreColumn];
-                return score !== null && score !== undefined && score !== '' && !isNaN(parseFloat(score));
-            }).length;
-            return validCount === 0;
-        });
-        
-        if (emptyYears.length > 0) {
-            console.warn('데이터가 없는 연도들:', emptyYears);
+        if (listContainer && listContainer.children.length === 0) {
+            console.log('대학 목록이 비어있음 - updateUniversityList() 실행');
+            updateUniversityList();
         }
     },
-    // CSV 컬럼 구조 상세 분석
-    analyzeCSVStructure: function() {
-        if (!csvData || csvData.length === 0) {
-            console.log('CSV 데이터가 없습니다.');
-            return;
-        }
-        
-        const firstRow = csvData[0];
-        const allColumns = Object.keys(firstRow);
-        
-        console.log('=== CSV 컬럼 구조 분석 ===');
-        console.log('총 컬럼 수:', allColumns.length);
-        
-        // 기본 정보 컬럼들
-        const basicColumns = allColumns.filter(col => !col.match(/^SCR_EST_\d{4}$/));
-        console.log('기본 정보 컬럼들:', basicColumns);
-        
-        // 점수 컬럼들 (연도별)
-        const scoreColumns = allColumns.filter(col => col.match(/^SCR_EST_\d{4}$/));
-        console.log('점수 컬럼들:', scoreColumns.sort());
-        
-        // 각 컬럼의 샘플 데이터
-        console.log('\n=== 컬럼별 샘플 데이터 ===');
-        allColumns.forEach(col => {
-            const sampleValues = csvData.slice(0, 3).map(row => row[col]);
-            console.log(`${col}:`, sampleValues);
-        });
+    // 수동으로 모드 변경 테스트
+    setManualMode: function() {
+        setSelectionMode('manual');
+    },
+    setAllMode: function() {
+        setSelectionMode('all');
     }
 };

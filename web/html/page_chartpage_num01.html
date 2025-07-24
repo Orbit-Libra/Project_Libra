@@ -104,6 +104,203 @@
             font-weight: 500;
             color: #333;
         }
+
+        /* 출력 범위 관련 스타일 */
+        .selection-mode {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+
+        .mode-btn {
+            flex: 1;
+            padding: 8px;
+            border: 1px solid #ddd;
+            background: white;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-size: 14px;
+        }
+
+        .mode-btn.active {
+            background: #42a5f5;
+            color: white;
+            border-color: #42a5f5;
+        }
+
+        /* 데이터 범위 슬라이더 스타일 */
+        .data-range-slider {
+            margin: 15px 0;
+        }
+
+        .data-count-info {
+            font-size: 12px;
+            color: #666;
+            margin-bottom: 10px;
+        }
+
+        .slider-container {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            margin-bottom: 10px;
+            width: 100%;
+            box-sizing: border-box;
+        }
+
+        .range-slider {
+            -webkit-appearance: none;
+            appearance: none;
+            flex: 1;
+            min-width: 0; /* 플렉스 아이템이 축소될 수 있도록 */
+            height: 8px;
+            border-radius: 5px;
+            background: #ddd;
+            outline: none;
+            transition: background 0.3s;
+        }
+
+        .range-slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            background: #42a5f5;
+            cursor: pointer;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+        }
+
+        .range-slider::-moz-range-thumb {
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            background: #42a5f5;
+            cursor: pointer;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+            border: none;
+        }
+
+        .range-labels {
+            display: flex;
+            justify-content: space-between;
+            font-size: 12px;
+            color: #666;
+            margin-bottom: 5px;
+            padding: 0 20px; /* 화살표 버튼 너비만큼 패딩 */
+        }
+
+        .selected-range {
+            text-align: center;
+            font-size: 14px;
+            color: #333;
+            font-weight: 500;
+        }
+
+        /* 화살표 버튼 스타일 */
+        .arrow-btn {
+            width: 20px;
+            height: 20px;
+            min-width: 20px; /* 최소 너비 고정 */
+            border: 1px solid #ddd;
+            background: white;
+            border-radius: 3px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 10px;
+            transition: all 0.2s;
+            flex-shrink: 0; /* 화살표 버튼은 축소되지 않도록 */
+        }
+
+        .arrow-btn:hover {
+            background: #f5f5f5;
+            border-color: #42a5f5;
+        }
+
+        .arrow-btn:active {
+            background: #42a5f5;
+            color: white;
+        }
+
+        /* 스크롤바 사이의 텍스트 */
+        .slider-container > span {
+            font-size: 12px;
+            color: #666;
+            flex-shrink: 0;
+            min-width: 12px;
+            text-align: center;
+        }
+
+        /* 대학 선택 모달 스타일 */
+        .university-selector {
+            max-height: 300px;
+            overflow-y: auto;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            padding: 10px;
+            background: #f9f9f9;
+            display: none;
+            margin-top: 10px;
+        }
+
+        .university-selector.active {
+            display: block;
+        }
+
+        .university-item {
+            display: flex;
+            align-items: center;
+            padding: 5px 0;
+            border-bottom: 1px solid #eee;
+        }
+
+        .university-item:last-child {
+            border-bottom: none;
+        }
+
+        .university-item input[type="checkbox"] {
+            margin-right: 10px;
+        }
+
+        .university-item label {
+            flex: 1;
+            cursor: pointer;
+            font-size: 14px;
+        }
+
+        /* 전체 선택/해제 버튼 */
+        .select-all-container {
+            padding: 10px;
+            border-bottom: 2px solid #ddd;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+
+        .select-all-btn {
+            padding: 5px 15px;
+            border: 1px solid #42a5f5;
+            background: white;
+            color: #42a5f5;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.3s;
+        }
+
+        .select-all-btn:hover {
+            background: #42a5f5;
+            color: white;
+        }
+
+        .selected-count {
+            font-size: 14px;
+            color: #666;
+        }
     </style>
 </head>
 <body>
@@ -223,31 +420,6 @@
                         </div>
 
                         <div class="form-group">
-                            <label for="dataRange">데이터 범위</label>
-                            <select id="dataRange" onchange="onDataRangeChange()" aria-label="데이터 범위 선택">
-                                <option value="all">전체 데이터</option>
-                                <option value="top">상위 데이터</option>
-                                <option value="bottom">하위 데이터</option>
-                                <option value="range">사용자 지정 범위</option>
-                            </select>
-                        </div>
-
-                        <div class="form-group" id="topBottomCountGroup" style="display: none;">
-                            <label for="topBottomCount">표시할 데이터 개수</label>
-                            <input type="number" id="topBottomCount" min="1" max="100" value="10" onchange="onDataRangeChange()" aria-label="표시할 데이터 개수">
-                        </div>
-
-                        <div class="form-group" id="rangeGroup" style="display: none;">
-                            <label for="rangeStart">시작 순위</label>
-                            <input type="number" id="rangeStart" min="1" placeholder="예: 1" onchange="onDataRangeChange()" aria-label="시작 순위">
-                        </div>
-
-                        <div class="form-group" id="rangeGroupEnd" style="display: none;">
-                            <label for="rangeEnd">끝 순위</label>
-                            <input type="number" id="rangeEnd" min="1" placeholder="예: 50" onchange="onDataRangeChange()" aria-label="끝 순위">
-                        </div>
-
-                        <div class="form-group">
                             <label for="yAxisMode">Y축 범위 설정</label>
                             <select id="yAxisMode" onchange="onYAxisModeChange()" aria-label="Y축 범위 모드 선택">
                                 <option value="enhanced">향상된 표시 (권장)</option>
@@ -265,6 +437,46 @@
                         <div class="form-group" id="customRangeGroupMax" style="display: none;">
                             <label for="yAxisMax">Y축 최대값</label>
                             <input type="number" id="yAxisMax" step="0.1" placeholder="최대값" onchange="onCustomRangeChange()" aria-label="Y축 최대값">
+                        </div>
+                    </div>
+
+                    <div class="panel-section">
+                        <h3>출력 범위</h3>
+                        <div class="selection-mode">
+                            <button class="mode-btn active" onclick="setSelectionMode('all')">필터링 후 전체</button>
+                            <button class="mode-btn" onclick="setSelectionMode('manual')">수동 선택</button>
+                        </div>
+                        
+                        <!-- 데이터 출력 범위 슬라이더 -->
+                        <div class="form-group" id="dataRangeSliderGroup">
+                            <label>출력 범위 (정렬 기준)</label>
+                            <div class="data-count-info" id="dataCountInfo">필터링된 데이터: 0개</div>
+                            <div class="data-range-slider">
+                                <div class="slider-container">
+                                    <button class="arrow-btn" onclick="adjustDataRange('start', -1)">◀</button>
+                                    <input type="range" id="dataStartSlider" class="range-slider" min="1" max="1" value="1" onchange="onDataSliderChange()">
+                                    <button class="arrow-btn" onclick="adjustDataRange('start', 1)">▶</button>
+                                    <span>~</span>
+                                    <button class="arrow-btn" onclick="adjustDataRange('end', -1)">◀</button>
+                                    <input type="range" id="dataEndSlider" class="range-slider" min="1" max="1" value="1" onchange="onDataSliderChange()">
+                                    <button class="arrow-btn" onclick="adjustDataRange('end', 1)">▶</button>
+                                </div>
+                                <div class="range-labels">
+                                    <span id="dataMinLabel">1</span>
+                                    <span id="dataMaxLabel">1</span>
+                                </div>
+                                <div class="selected-range" id="selectedDataRange">전체</div>
+                            </div>
+                        </div>
+                        
+                        <div class="university-selector" id="universitySelector">
+                            <div class="select-all-container">
+                                <button class="select-all-btn" onclick="toggleAllUniversities()">전체 선택/해제</button>
+                                <span class="selected-count" id="selectedCount">0개 선택됨</span>
+                            </div>
+                            <div id="universityList">
+                                <!-- 동적으로 생성됨 -->
+                            </div>
                         </div>
 
                         <button class="generate-btn" onclick="generateChart()" type="button" id="generateBtn">
@@ -342,6 +554,10 @@
                                 <div class="info-item">
                                     <span class="label">정렬 방식:</span>
                                     <span class="value" id="currentSortOrder">환경점수 높은 순</span>
+                                </div>
+                                <div class="info-item">
+                                    <span class="label">선택 모드:</span>
+                                    <span class="value" id="currentSelectionMode">필터링 후 전체</span>
                                 </div>
                                 <div class="info-item">
                                     <span class="label">데이터 수:</span>

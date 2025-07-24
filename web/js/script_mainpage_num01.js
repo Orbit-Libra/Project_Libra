@@ -20,7 +20,8 @@ function navigateTo(page) {
 }
 // 로그인 함수
 function showLogin() {
-    alert('로그인 페이지로 이동합니다.');
+    // alert('로그인 페이지로 이동합니다.');
+    window.location.href = 'page_devpage_num01.html';
     
     // 실제 로그인 모달이나 페이지 로직을 여기에 구현
     // 예: 모달 창 열기, 로그인 페이지로 이동 등
