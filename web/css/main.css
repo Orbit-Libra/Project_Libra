@@ -1,10 +1,10 @@
-/* ../css/main.css */
-/* Reset & 공용 스타일 */
+/* css/main.css */
+/* Reset & scroll-snap */
 /* TODO: px→rem, width/height→vw/vh 통일 */
 :root {
   --color-bg-header: #010002;
   --color-footer-bg: #0d1f2d;
-  --color-logo-text: lab(93.13% -25.51 -8.16);
+  --color-logo-text: lab(69.67% -15.03 -23.49); 
   --color-body-bg: #0b5264;
   --color-nav-text: #0c3f2f;
   --color-highlight: #204461;
@@ -13,172 +13,84 @@
 }
 
 * { box-sizing: border-box; margin: 0; padding: 0; }
- html, body {
-      height: 100%;
-      margin: 0;
-      overflow-y: scroll;
-      scroll-snap-type: y mandatory;
-      scroll-behavior: smooth;
-    }
-    body { font-family: sans-serif; }
-    a { text-decoration: none; color: inherit; }
-
-/* Header */
-#site-header {
-  position: absolute; top: 0; left: 0;
-  width: 100%; padding: 1rem 2rem;
-  background: transparent; color: #fff;
-  display: flex; align-items: center;
-  z-index: 10;
+html, body {
+  height: 100%;
+  overflow-y: scroll;
+  scroll-snap-type: y mandatory;
+  scroll-behavior: smooth;
 }
-#site-header .logo { display: flex; align-items: center; cursor: pointer; }
-#site-header .logo img { height: 4.0rem; }
-#site-header .logo span { 
-  color: lab(69.67% -15.03 -23.49);    /* ← 로고 아이콘 색과 동일하게 */
-  font-size: 1.5rem; font-weight: bold; margin-left: 0.5rem; }
-#site-header nav { margin-left: auto;  margin-right: 2cm;}
-#site-header .nav-link {
-  margin-left: 2rem; 
-  transition: color .2s;  color: inherit;
-  text-decoration: none;    /* 기본 밑줄 제거 */
-}
-#site-header .nav-link:hover { color: lab(69.67% -15.03 -23.49); }
+body { font-family: sans-serif; }
 
+/* Header (injected via fetch) */
+#site-header { position: fixed; top:0; left:0; width:100vw; padding:1rem 2rem;
+  display:flex; align-items:center; background:transparent; color:#fff; z-index:10; }
+#site-header .logo img { height:2.5rem; }
+#site-header .logo span { color:lab(69.67% -15.03 -23.49);  font-size:1.5rem; font-weight:bold; margin-left:.5rem; }
+#site-header nav { margin-left:auto; margin-right:2cm; }
+#site-header .nav-link { margin-left:2rem; color:inherit; text-decoration:none; /* 기본 밑줄 제거 */ transition:color .2s; }
+#site-header .nav-link:hover { color:lab(69.67% -15.03 -23.49);  text-decoration:underline; }
 
-/* 섹션 공통 */
-/* TODO: 여기에 헤더·슬라이더·서브그리드·챗봇·푸터 스타일을 rem/vw/vh로 채워 넣기 */
-.section {
-  width: 100vw;
-  height: 100vh;
-  scroll-snap-align: start;
-  position: relative;
-  overflow: hidden;
-}
+/* Section 공통 (슬라이더·3컬럼) */
+.section { width:100vw; height:100vh; position:relative;
+  scroll-snap-align:start; overflow:hidden; }
 
 /* HERO SLIDER */
-.slider {
-  position: relative;    /* overflow:visible 위해서 */
-  overflow: visible;     /* 양쪽 arrow가 잘리지 않도록 */
-  display: flex;
-}
-.slides { display: flex; width: 300%; height: 100%; transition: transform .6s ease; }
-.slide { flex: 1 0 100%; }
+.slider { position:relative; overflow:visible; display:flex; }
+.slides { display:flex; width:300%; height:100%; transition:transform .6s ease; }
+.slide { flex:1 0 100%; }
 .placeholder-slide {
-  width: 100vw;
-  height: 100vh;
-  background: #111;
-  color: #fff;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 2rem;
+  width:100vw; height:100vh; background:#111; color:#fff;
+  display:flex; align-items:center; justify-content:center; font-size:2rem;
 }
 .arrow {
-  position: absolute;
-  top: 50%;
-  transform: translateY(-50%);
-  background: rgba(0,0,0,0.4);
-  color: #fff;
-  padding: 0.5rem;
-  cursor: pointer;
-  z-index: 20;
+  position:absolute; top:50%; transform:translateY(-50%);
+  background:rgba(0,0,0,0.4); color:#fff; padding:.5rem; cursor:pointer; z-index:20;
 }
-.arrow.left { left: 1rem; }
-.arrow.right { right: 1rem; }
+.arrow.left  { left:1rem;  }
+.arrow.right { right:1rem; }
 
-
-
-/* Three-column */
-.subgrid {
-  display: flex; width: 100vw; height: 100vh;
-}
-.sub {
-  flex: 1;  position: relative; cursor: pointer;
-}
-.sub:nth-child(1) { background: #add8e6; }
-.sub:nth-child(2) { background: #7a5656; }
-.sub:nth-child(3) { background: #f5a623; }
+/* THREE-COLUMN */
+.subgrid { display:flex; width:100vw; height:100vh; }
+.sub { flex:1; position:relative; cursor:pointer; }
+.sub:nth-child(1) { background:#add8e6; }
+.sub:nth-child(2) { background:#222; }
+.sub:nth-child(3) { background:#f5a623; }
 .sub-title {
-  position: absolute; bottom: 1rem; left: 1rem;
-  color: #fff; font-size: 1.2rem;
+  position:absolute; bottom:1rem; left:1rem; color:#fff; font-size:1.2rem;
 }
-.sub:hover { opacity: 0.9; }
+.sub:hover { opacity:.9; }
 
-/* Footer */
+/* FOOTER */
 #site-footer {
-  position: absolute; bottom: 0;
-  width: 100vw; text-align: center;
-  padding: 1rem 0; background: #0d1f2d; color: #fff;
-  scroll-snap-align: start; /* 원하면 스크롤 스냅만 유지 */
+  width:100vw; padding:1rem 0; background:#0d1f2d; color:#fff;
+  text-align:center; scroll-snap-align:start;
 }
 
-
-/* Chatbot */
-.chatbot {
-  position: fixed; bottom: 1rem; right: 1rem;
-  z-index: 30; cursor: pointer; /* 클릭 포인터 유지 */
-}
-.chat-icon {
-  width: 3.75rem;    /* 60px */
-  height: 3.75rem;   /* 60px */
-  overflow: hidden; border-radius: 50%;/* 원형 유지 */
-}
-#chatbot-img {
-  width: 100%; height: 100%; object-fit: contain;
-}
-/* chat-Body: 스크롤 가능한 대화 영역 */
-.chat-body {
-  flex: 1; padding: 0.5rem;
-  overflow-y: auto; background: #f9f9f9;
-}
+/* CHATBOT */
+.chatbot { position:fixed; bottom:1rem; right:1rem; z-index:30; cursor:pointer; }
+.chat-icon { width:3.75rem; height:3.75rem; border-radius:50%; overflow:hidden; }
+#chatbot-img { width:100%; height:100%; object-fit:contain; }
 .chat-window {
-  position: fixed; bottom: 1rem; right: 1rem;
-  width: 18.75rem;      /* 300px */
-  height: 80vh;         /* 화면 높이의 80% */
-  background: #fff; 
-  box-shadow: -2px 2px 10px rgba(202, 25, 25, 0.2);
-  display: flex; flex-direction: column;
-  transform: translateY(100%);
-  transition: transform .3s ease-in-out;
-  z-index: 29;
+  position:fixed; bottom:1rem; right:1rem; width:18.75rem; height:80vh;
+  background:#fff; box-shadow:-2px 2px 10px rgba(0,0,0,0.2);
+  display:flex; flex-direction:column;
+  transform:translateY(100%); transition:transform .3s ease-in-out; z-index:29;
 }
-.chat-window.open {
-  transform: translateY(0);    /* 열릴 때 제자리로 */
-}
-/* chat-Header: 제목 + 닫기 */
+.chat-window.open { transform:translateY(0); }
 .chat-header {
-  background: #009fe3;
-  color: #85e3f3;
-  padding: .5rem;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
+  background:#009fe3; color:#fff; padding:.5rem;
+  display:flex; justify-content:space-between; align-items:center;
 }
-#chatCloseBtn {
-  background: none; border: none;
-  color: #fff; font-size: 1.2rem; cursor: pointer;
-}
-/* Input: 고정 하단 */
-.chat-input {
-  display: flex; border-top: 1px solid #ddd;
-}
-#chatInput {
-  flex: 1; border: none;
-  padding: 0.5rem; font-size: 0.9rem;
-}
-#chatInput:focus { outline: none;}
-#chatSendBtn {
-  padding: 0.75rem; border: none;
-  background: #009fe3; color: #fff;
-  cursor: pointer;
-}
-#chatSendBtn:hover {background: #007bb5;}
-
-
+#chatCloseBtn { background:none; border:none; color:#fff; font-size:1.2rem; cursor:pointer; }
+.chat-body { flex:1; padding:.5rem; overflow-y:auto; background:#f9f9f9; }
+.chat-input { display:flex; border-top:1px solid #ddd; }
+#chatInput { flex:1; border:none; padding:.5rem; font-size:.9rem; }
+#chatInput:focus { outline:none; }
+#chatSendBtn { padding:0 .75rem; border:none; background:#009fe3; color:#fff; cursor:pointer; }
+#chatSendBtn:hover { background:#007bb5; }
 
 /* Responsive */
 @media(max-width:768px) {
-  #site-header .nav-link { margin-left: 1rem; font-size: .9rem; }
-  .arrow { padding: .3rem; }
+  #site-header .nav-link { margin-left:1rem; font-size:.9rem; }
+  .arrow { padding:.3rem; }
 }
-
