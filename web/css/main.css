@@ -19,32 +19,37 @@ html, body {
   scroll-snap-type: y mandatory;
   scroll-behavior: smooth;
 }
-body { font-family: sans-serif; }
+body {margin: 0; padding: 0; font-family: sans-serif; }
 
 /* Header (injected via fetch) */
-#site-header { position: fixed; top:0; left:0; width:100vw; padding:1rem 2rem;
+#site-header { position: fixed; top:0; left:0; width:100vw; padding:1rem 4vw;    /* 좌우 2rem → 4vw (브라우저 폭에 따라 유연) */
   display:flex; align-items:center; background:transparent; color:#fff; z-index:10; }
 #site-header .logo img { height:2.5rem; }
 #site-header .logo span { color:lab(69.67% -15.03 -23.49);  font-size:1.5rem; font-weight:bold; margin-left:.5rem; }
-#site-header nav { margin-left:auto; margin-right:2cm; }
+/* nav 우측 여백 */
+#site-header nav { margin-left:auto; margin-right:2rem;  }
 #site-header .nav-link { margin-left:2rem; color:inherit; text-decoration:none; /* 기본 밑줄 제거 */ transition:color .2s; }
-#site-header .nav-link:hover { color:lab(69.67% -15.03 -23.49);  text-decoration:underline; }
+#site-header .nav-link:hover { color:lab(69.67% -15.03 -23.49);  text-decoration: none; /* 기본 밑줄 제거 */ }
 
-/* Section 공통 (슬라이더·3컬럼) */
+/* Section 공통 부모요소 (슬라이더·3컬럼) */
 .section { width:100vw; height:100vh; position:relative;
-  scroll-snap-align:start; overflow:hidden; }
+  scroll-snap-align:start; overflow:hidden;
+  /* overflow:hidden;  >>arrow 오른쪽버튼때문에 주석처리>>영향없는데??*/
+}
 
 /* HERO SLIDER */
-.slider { position:relative; overflow:visible; display:flex; }
+.slider { position:relative; overflow: visible;} /*부모컨테이너*/
 .slides { display:flex; width:300%; height:100%; transition:transform .6s ease; }
 .slide { flex:1 0 100%; }
 .placeholder-slide {
   width:100vw; height:100vh; background:#111; color:#fff;
   display:flex; align-items:center; justify-content:center; font-size:2rem;
 }
+/* arrow 패딩 */
 .arrow {
+  outline: 2px solid #add8e6;    /* 테두리 그려서 위치를 봅니다 */
   position:absolute; top:50%; transform:translateY(-50%);
-  background:rgba(0,0,0,0.4); color:#fff; padding:.5rem; cursor:pointer; z-index:20;
+  background:#0b5264; color:#fff; padding:.5rem; cursor:pointer; z-index:20;
 }
 .arrow.left  { left:1rem;  }
 .arrow.right { right:1rem; }
@@ -68,26 +73,47 @@ body { font-family: sans-serif; }
 
 /* CHATBOT */
 .chatbot { position:fixed; bottom:1rem; right:1rem; z-index:30; cursor:pointer; }
-.chat-icon { width:3.75rem; height:3.75rem; border-radius:50%; overflow:hidden; }
-#chatbot-img { width:100%; height:100%; object-fit:contain; }
+.chat-icon { width:7.5rem; height:7.5rem; border-radius:50%; overflow:hidden; }
+#chatbot-img { width:100%; height:100%; object-fit:contain; transform: scaleX(-1);  /* ← 좌우 반전(수평 뒤집기) */}
+/* Chat Window */
 .chat-window {
-  position:fixed; bottom:1rem; right:1rem; width:18.75rem; height:80vh;
-  background:#fff; box-shadow:-2px 2px 10px rgba(0,0,0,0.2);
-  display:flex; flex-direction:column;
-  transform:translateY(100%); transition:transform .3s ease-in-out; z-index:29;
+  position:fixed; bottom:1rem; right:1rem; width:18.75rem; /* 300px → 18.75rem */ 
+  height:80vh; background:#fff; box-shadow:-2px 2px 10px rgba(0,0,0,0.2);
+  display:flex; flex-direction:column; transform:translateY(100%); 
+  transition:transform .3s ease-in-out; z-index:29;
 }
 .chat-window.open { transform:translateY(0); }
 .chat-header {
-  background:#009fe3; color:#fff; padding:.5rem;
+  background:lab(69.67% -15.03 -23.49); color:#fff; padding:.5rem;
   display:flex; justify-content:space-between; align-items:center;
 }
-#chatCloseBtn { background:none; border:none; color:#fff; font-size:1.2rem; cursor:pointer; }
-.chat-body { flex:1; padding:.5rem; overflow-y:auto; background:#f9f9f9; }
-.chat-input { display:flex; border-top:1px solid #ddd; }
-#chatInput { flex:1; border:none; padding:.5rem; font-size:.9rem; }
+#chatCloseBtn {background:none; border:none; color:#fff; font-size:1.2rem; cursor:pointer; }
+/*  Firefox */
+.chat-body {
+  scrollbar-width: none;        /* Firefox 전용 */
+  -ms-overflow-style: none;     /* IE 10+ 전용 */
+}
+.chat-body {background:#f9f9f9; flex:1; padding:.5rem; overflow-y: auto;}
+/*  챗창 내부 스크롤바 숨기기 (WebKit 브라우저) */
+.chat-body::-webkit-scrollbar {
+  width: 0;
+  height: 0;
+}
+.chat-body::-webkit-scrollbar-track {
+  display: none;
+}
+.chat-body::-webkit-scrollbar-thumb {
+  display: none;
+}
+Chat Input Border
+.chat-input { display:flex; border-top:0.0625rem solid lab(69.67% -15.03 -23.49); /* 1px → 0.0625rem 메세지칸 테투리실선*/ }
+#chatInput { color: #6363c2;/* 컬러 */font-size:.9rem; flex:1; border:none; padding:.5rem;  }
+/* 메세지를 입력하세요... */
+#chatInput::placeholder { 
+  color: lab(69.67% -15.03 -23.49); }
 #chatInput:focus { outline:none; }
-#chatSendBtn { padding:0 .75rem; border:none; background:#009fe3; color:#fff; cursor:pointer; }
-#chatSendBtn:hover { background:#007bb5; }
+#chatSendBtn { padding:0 .75rem; border:none; background:lab(69.67% -15.03 -23.49); color:#fff; cursor:pointer; }
+#chatSendBtn:hover { background:lab(69.67% -15.03 -23.49); }
 
 /* Responsive */
 @media(max-width:768px) {
