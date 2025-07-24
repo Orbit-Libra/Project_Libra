@@ -247,6 +247,32 @@ function onYearSliderChange() {
     }
 }
 
+// 화살표 버튼으로 연도 범위 조절
+function adjustYearRange(type, delta) {
+    const startSlider = document.getElementById('yearStartSlider');
+    const endSlider = document.getElementById('yearEndSlider');
+    const maxValue = availableYears.length - 1;
+    
+    if (type === 'start') {
+        let newValue = selectedYearRange.start + delta;
+        newValue = Math.max(0, Math.min(newValue, selectedYearRange.end));
+        selectedYearRange.start = newValue;
+        startSlider.value = newValue;
+    } else if (type === 'end') {
+        let newValue = selectedYearRange.end + delta;
+        newValue = Math.max(selectedYearRange.start, Math.min(newValue, maxValue));
+        selectedYearRange.end = newValue;
+        endSlider.value = newValue;
+    }
+    
+    updateSelectedYearRangeDisplay();
+    
+    // 차트가 있으면 업데이트
+    if (trendChart || pieChart) {
+        generateChart();
+    }
+}
+
 // 선택된 연도 범위 표시 업데이트
 function updateSelectedYearRangeDisplay() {
     const rangeDisplay = document.getElementById('selectedYearRange');
@@ -330,6 +356,27 @@ function onDataSliderChange() {
     
     selectedDataRange.start = startIdx;
     selectedDataRange.end = endIdx;
+    
+    updateSelectedDataRangeDisplay();
+}
+
+// 화살표 버튼으로 데이터 범위 조절
+function adjustDataRange(type, delta) {
+    const startSlider = document.getElementById('dataStartSlider');
+    const endSlider = document.getElementById('dataEndSlider');
+    const maxValue = parseInt(endSlider.max);
+    
+    if (type === 'start') {
+        let newValue = selectedDataRange.start + delta;
+        newValue = Math.max(1, Math.min(newValue, selectedDataRange.end));
+        selectedDataRange.start = newValue;
+        startSlider.value = newValue;
+    } else if (type === 'end') {
+        let newValue = selectedDataRange.end + delta;
+        newValue = Math.max(selectedDataRange.start, Math.min(newValue, maxValue));
+        selectedDataRange.end = newValue;
+        endSlider.value = newValue;
+    }
     
     updateSelectedDataRangeDisplay();
 }
@@ -825,7 +872,7 @@ function navigateTo(page) {
             window.location.href = 'page_prediction_num01.html';
             break;
         case 'myservice':
-            window.location.href = 'page_userpage_num01.html';  // 현재 페이지
+            window.location.href = 'page_userpage_num01.html';
             break;
         case 'mypage':
             alert('마이 페이지로 이동합니다.');
@@ -944,7 +991,7 @@ function saveAnalysis() {
             start: selectedDataRange.start,
             end: selectedDataRange.end
         },
-        showAverage: showAverage, // 평균값 표시 설정 저장
+        showAverage: showAverage,
         styp: document.getElementById('stypFilter').value,
         fnd: document.getElementById('fndFilter').value,
         rgn: document.getElementById('rgnFilter').value,
@@ -1032,7 +1079,10 @@ function debugInfo() {
         startYear: availableYears[selectedYearRange.start],
         endYear: availableYears[selectedYearRange.end]
     });
+    console.log('선택된 데이터 범위:', selectedDataRange);
     console.log('평균값 표시:', showAverage);
+    console.log('선택 모드:', selectionMode);
+    console.log('선택된 대학 수:', selectedUniversities.size);
     console.log('현재 차트:', {
         trendChart: trendChart ? '있음' : '없음',
         pieChart: pieChart ? '있음' : '없음'
@@ -1114,5 +1164,31 @@ window.libraPrediction = {
             console.log(`- 점수 범위: ${Math.min(...scores)} ~ ${Math.max(...scores)}`);
             console.log(`- 평균 점수: ${(scores.reduce((a, b) => a + b, 0) / scores.length).toFixed(2)}`);
         }
+    },
+    // 화살표 기능 테스트
+    testArrowFunctions: function() {
+        console.log('화살표 기능 테스트');
+        console.log('현재 연도 범위:', selectedYearRange);
+        console.log('현재 데이터 범위:', selectedDataRange);
+        
+        // 연도 범위 화살표 테스트
+        console.log('연도 시작 +1 테스트');
+        adjustYearRange('start', 1);
+        console.log('변경 후 연도 범위:', selectedYearRange);
+        
+        // 원복
+        console.log('연도 시작 -1 테스트 (원복)');
+        adjustYearRange('start', -1);
+        console.log('원복 후 연도 범위:', selectedYearRange);
+        
+        // 데이터 범위 화살표 테스트
+        console.log('데이터 끝 +1 테스트');
+        adjustDataRange('end', 1);
+        console.log('변경 후 데이터 범위:', selectedDataRange);
+        
+        // 원복
+        console.log('데이터 끝 -1 테스트 (원복)');
+        adjustDataRange('end', -1);
+        console.log('원복 후 데이터 범위:', selectedDataRange);
     }
 };

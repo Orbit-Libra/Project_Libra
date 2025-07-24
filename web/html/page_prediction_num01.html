@@ -48,14 +48,17 @@
         .slider-container {
             display: flex;
             align-items: center;
-            gap: 10px;
+            gap: 6px;
             margin-bottom: 10px;
+            width: 100%;
+            box-sizing: border-box;
         }
 
         .range-slider {
             -webkit-appearance: none;
             appearance: none;
-            width: 100%;
+            flex: 1;
+            min-width: 0; /* 플렉스 아이템이 축소될 수 있도록 */
             height: 8px;
             border-radius: 5px;
             background: #ddd;
@@ -66,8 +69,8 @@
         .range-slider::-webkit-slider-thumb {
             -webkit-appearance: none;
             appearance: none;
-            width: 20px;
-            height: 20px;
+            width: 16px;
+            height: 16px;
             border-radius: 50%;
             background: #42a5f5;
             cursor: pointer;
@@ -75,12 +78,13 @@
         }
 
         .range-slider::-moz-range-thumb {
-            width: 20px;
-            height: 20px;
+            width: 16px;
+            height: 16px;
             border-radius: 50%;
             background: #42a5f5;
             cursor: pointer;
             box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+            border: none;
         }
 
         .range-labels {
@@ -88,6 +92,8 @@
             justify-content: space-between;
             font-size: 12px;
             color: #666;
+            margin-bottom: 5px;
+            padding: 0 20px; /* 화살표 버튼 너비만큼 패딩 */
         }
 
         .selected-range {
@@ -106,7 +112,43 @@
         .data-count-info {
             font-size: 12px;
             color: #666;
-            margin-bottom: 5px;
+            margin-bottom: 10px;
+        }
+
+        /* 화살표 버튼 스타일 */
+        .arrow-btn {
+            width: 20px;
+            height: 20px;
+            min-width: 20px; /* 최소 너비 고정 */
+            border: 1px solid #ddd;
+            background: white;
+            border-radius: 3px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 10px;
+            transition: all 0.2s;
+            flex-shrink: 0; /* 화살표 버튼은 축소되지 않도록 */
+        }
+
+        .arrow-btn:hover {
+            background: #f5f5f5;
+            border-color: #42a5f5;
+        }
+
+        .arrow-btn:active {
+            background: #42a5f5;
+            color: white;
+        }
+
+        /* 스크롤바 사이의 텍스트 */
+        .slider-container > span {
+            font-size: 12px;
+            color: #666;
+            flex-shrink: 0;
+            min-width: 12px;
+            text-align: center;
         }
 
         /* 대학 선택 모달 스타일 */
@@ -326,9 +368,13 @@
                             <label>연도 범위</label>
                             <div class="year-range-slider">
                                 <div class="slider-container">
+                                    <button class="arrow-btn" onclick="adjustYearRange('start', -1)">◀</button>
                                     <input type="range" id="yearStartSlider" class="range-slider" min="0" max="0" value="0" onchange="onYearSliderChange()">
+                                    <button class="arrow-btn" onclick="adjustYearRange('start', 1)">▶</button>
                                     <span>~</span>
+                                    <button class="arrow-btn" onclick="adjustYearRange('end', -1)">◀</button>
                                     <input type="range" id="yearEndSlider" class="range-slider" min="0" max="0" value="0" onchange="onYearSliderChange()">
+                                    <button class="arrow-btn" onclick="adjustYearRange('end', 1)">▶</button>
                                 </div>
                                 <div class="range-labels">
                                     <span id="minYearLabel">-</span>
@@ -391,9 +437,13 @@
                             <div class="data-count-info" id="dataCountInfo">필터링된 데이터: 0개</div>
                             <div class="data-range-slider">
                                 <div class="slider-container">
+                                    <button class="arrow-btn" onclick="adjustDataRange('start', -1)">◀</button>
                                     <input type="range" id="dataStartSlider" class="range-slider" min="1" max="1" value="1" onchange="onDataSliderChange()">
+                                    <button class="arrow-btn" onclick="adjustDataRange('start', 1)">▶</button>
                                     <span>~</span>
+                                    <button class="arrow-btn" onclick="adjustDataRange('end', -1)">◀</button>
                                     <input type="range" id="dataEndSlider" class="range-slider" min="1" max="1" value="1" onchange="onDataSliderChange()">
+                                    <button class="arrow-btn" onclick="adjustDataRange('end', 1)">▶</button>
                                 </div>
                                 <div class="range-labels">
                                     <span id="dataMinLabel">1</span>
