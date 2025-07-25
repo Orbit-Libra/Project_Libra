@@ -1,4 +1,4 @@
-/* css/main.css */
+/* css/main.css - 수정된 버전 */
 /* TODO: px→rem, width/height→vw/vh 통일 */
 :root {
   --color-bg-header: #010002;
@@ -7,7 +7,7 @@
   --color-body-bg: #0b5264;
   --color-nav-text: #0c3f2f;
   --color-highlight: #204461;
-  --clolr-text-shadow: #2e1b8388;
+  --color-text-shadow: #2e1b8388; /* 오타 수정: clolr -> color */
   --font-sans: 'Noto Sans KR', sans-serif;
 }
 
@@ -19,8 +19,8 @@
 }
 
 html, body {
-  height: 100vh; /* 100vw -> 100vh로 수정 */
-  width: 100vw; /* 100% -> 100vw로 수정 */
+  height: 100vh;
+  width: 100vw;
   margin: 0;
   padding: 0;
   overflow-x: hidden; /* 가로 스크롤 완전 제거 */
@@ -37,6 +37,7 @@ a {
   text-decoration: none; 
   color: inherit; 
 }
+
 /* 임시 오버레이 */
 #temp-overlay {
   position: fixed;
@@ -79,34 +80,12 @@ a {
   display: none; /* Chrome, Safari, Edge */
 }
 
-/* 방법 2: 대안으로 최소한으로 만들기 (위 방법이 안 될 경우 주석 해제) */
-/*
-html, body {
-  scrollbar-width: none;
-  -ms-overflow-style: none;
-}
-
-html::-webkit-scrollbar,
-body::-webkit-scrollbar {
-  width: 0px;
-  background: transparent;
-  display: none;
-}
-
-html::-webkit-scrollbar-thumb,
-body::-webkit-scrollbar-thumb {
-  background: transparent;
-}
-*/
-
-
-
 /* Header */
 #site-header { 
   position: fixed; 
   top: 0; 
   left: 0; 
-  width: 100vw; /* 100% -> 100vw */
+  width: 100vw;
   padding: 1rem 4vw;
   display: flex; 
   align-items: center; 
@@ -126,8 +105,8 @@ body::-webkit-scrollbar-thumb {
   display: flex; 
   align-items: center; 
   text-shadow: 
-    0 0.1rem 0.2rem rgba(0,0,0,0.5),     /* 진한 외곽 그림자 */
-    0 0.05rem 0.1rem rgba(0,0,0,0.3);     /* 은은한 내부 그림자 */
+    0 0.1rem 0.2rem rgba(0,0,0,0.5),
+    0 0.05rem 0.1rem rgba(0,0,0,0.3);
   transition: color .2s ease, 
               transform .2s ease;
 }
@@ -135,9 +114,7 @@ body::-webkit-scrollbar-thumb {
 #site-header .logo img { 
   height: 2.5rem;
   width: auto;
-    /* 부드러운 변환을 위해 트랜지션 추가 */
   transition: transform 0.3s ease, filter 0.3s ease;
-
 }
 
 #site-header .logo span { 
@@ -157,20 +134,22 @@ body::-webkit-scrollbar-thumb {
   font-weight: bold;
   color: #fff; 
   text-shadow: 
-    0 0.1rem 0.2rem rgba(0,0,0,0.7),     /* 진한 외곽 그림자 */
-    0 0.05rem 0.1rem rgba(0,0,0,0.5);     /* 은은한 내부 그림자 */
+    0 0.1rem 0.2rem rgba(0,0,0,0.7),
+    0 0.05rem 0.1rem rgba(0,0,0,0.5);
   transition: color .2s ease, 
               transform .2s ease;
 }
+
 /* hover 시 좀 더 강조 & 약간 확대 */
 #site-header .nav-link:hover { 
   color: lab(69.67% -15.03 -23.49); 
-  transform: scale(1.1);       /* 살짝 커짐 */
+  transform: scale(1.1);
   text-shadow:
     0 0.2rem 0.4rem rgba(0,0,0,0.8),
     0 0.1rem 0.2rem rgba(0,0,0,0.6);
   font-weight: bold;
 }
+
 /* logo 호버 시 스케일 업 + 약간 밝게 */
 #site-header .logo:hover img {
   transform: scale(1.1) translateY(-0.2rem);
@@ -179,22 +158,12 @@ body::-webkit-scrollbar-thumb {
 
 /* Section 공통 부모요소 */
 .section { 
-  width: 100vw; /* 100% -> 100vw */
+  width: 100vw;
   height: 100vh;
   position: relative;
   scroll-snap-align: start;
   overflow: hidden; /* 내부 스크롤 방지 */
 }
-
-/* sections-wrapper 수정 */
-/* .sections-wrapper {
-  width: 100vw;
-  height: 100vh;
-  overflow-x: hidden; /* 가로 스크롤 완전 차단 */
-  /* overflow-y: auto; /* 세로 스크롤만 허용 */
-  /* scroll-snap-type: y mandatory;
-  scroll-behavior: smooth;
-} */ 
 
 .section.slider {
   height: 100vh;
@@ -213,8 +182,8 @@ body::-webkit-scrollbar-thumb {
   position: absolute;
   top: 0; 
   left: 0;
-  width: 100vw; /* 100% -> 100vw */
-  height: 100vh; /* 100% -> 100vh */
+  width: 100vw;
+  height: 100vh;
   opacity: 0; 
   z-index: 1;
   transition: opacity 1s ease;
@@ -226,7 +195,7 @@ body::-webkit-scrollbar-thumb {
   z-index: 2;
 }
 
-/* 이미지 꽉 채우기 - 중요한 수정 */
+/* 이미지 꽉 채우기 */
 .slider .slide img {
   width: 100vw;
   height: 100vh;
@@ -300,7 +269,6 @@ body::-webkit-scrollbar-thumb {
           drop-shadow(0 0.1rem 0.2rem rgba(0,0,0,0.6));
 }
 
-
 /* Arrow 버튼 */
 .arrow {
   position: absolute; 
@@ -316,19 +284,18 @@ body::-webkit-scrollbar-thumb {
 .arrow.left  { left: 1rem;}
 .arrow.right { right: 1rem;}
 
-
-
-/* THREE-COLUMN - 중요한 수정 */
+/* THREE-COLUMN */
 .subgrid { 
   display: flex; 
-  width: 100vw; /* 100% -> 100vw 브라우저 너비꽉*/
-  height: 100vh; /* 1페이지만큼*/
+  width: 100vw;
+  height: 100vh;
   overflow: hidden; /* 내부 스크롤 방지 */
   margin: 0;
   padding: 0;
-  gap: 0;          /* flex-gap 제거 */
+  gap: 0; /* flex-gap 제거 */
 }
-/* 공통 카드 스타일 + 변수로 들어올 bg */
+
+/* 공통 카드 스타일 */
 .sub { 
   flex: 1 1 0; /* 균등 분할 */
   position: relative; 
@@ -340,7 +307,7 @@ body::-webkit-scrollbar-thumb {
 .sub-img {
   display: block; /* inline 요소 여백 제거 */
   width: 100%;
-  height: 100vh; /* 100% -> 100vh */
+  height: 100vh;
   object-fit: cover;
   object-position: center;
   transition: filter .4s ease, transform .4s ease;
@@ -425,17 +392,15 @@ body::-webkit-scrollbar-thumb {
   font-weight: bold;
 }
 
-
 /* FOOTER */
 #site-footer {
-  width: 100vw; /* 100vw로 수정 */
+  width: 100vw;
   padding: 1rem 0; 
   background: var(--color-footer-bg,#0d1f2d); 
   color: #fff;
   text-align: center; 
   scroll-snap-align: start;
 }
-
 
 /* CHATBOT */
 .chatbot { 
@@ -545,9 +510,6 @@ body::-webkit-scrollbar-thumb {
 #chatSendBtn:hover { 
   background: lab(69.67% -15.03 -23.49); 
 }
-
-
-
 
 /* Responsive */
 @media(max-width: 768px) {
