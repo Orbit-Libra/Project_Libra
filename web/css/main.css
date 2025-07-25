@@ -62,21 +62,31 @@ a { text-decoration: none; color: inherit; }
 }
 
 
-/* HERO SLIDER */
-.slider {position:relative; overflow: visible; height:100vh; overflow:hidden;} /*부모컨테이너*/
+* ── HERO SLIDER ── */
+.slider {
+  position: relative;
+  overflow: hidden;
+  height: 100vh;              /* 한 화면 가득 */
+}
+
 .slider .slide {
-  position:absolute; top:0; left:0;
-  width:100%; height:100%; opacity:0; z-index:1;
-  transition:opacity 1s ease;
+  position: absolute;
+  top: 0; left: 0;
+  width: 100%; height: 100%;
+  opacity: 0; z-index: 1;
+  transition: opacity 1s ease;
 }
 .slider .slide.active {
-  opacity:1; z-index:2;
+  opacity: 1; z-index: 2;
 }
+
 /* 이미지 꽉 채우기 */
 .slider .slide img {
-  width:100%; height:100%; object-fit:cover;
+  width: 100%; height: 100%;
+  object-fit: cover;
 }
-/* 텍스트 오버레이 >>>3개글씨 2줄씩*/
+
+/* ── 텍스트 오버레이 (메인+서브) ── */
 .slider-overlay {
   position: absolute;
   top: 50%; left: 50%;
@@ -84,19 +94,74 @@ a { text-decoration: none; color: inherit; }
   text-align: center;
   color: #fff;
   z-index: 3;
-  pointer-events: none;
+  pointer-events: auto;       /* hover 감지 */
+  cursor: pointer;            /* 포인터 표시 */
+  transition: transform .3s ease, text-shadow .3s ease;
 }
+
+/* 메인 타이틀 */
 .slide-title-main {
   font-size: 3.5rem;
   font-weight: bold;
   text-shadow: 0 0 .5rem rgba(0,0,0,0.7);
+  margin-bottom: .5rem;
 }
+
+/* 서브 타이틀 */
 .slide-title-sub {
   font-size: 1.2rem;
-  margin-top: .5rem;
   text-shadow: 0 0 .5rem rgba(0,0,0,0.7);
 }
 
+/* 오버레이 로고를 흰색으로 표시 (원본이 컬러라면 filter 로 뒤집거나, 흰 SVG를 쓰세요) */
+.slider-overlay .overlay-logo {
+  display: block;
+  max-width: 15rem !important;    /* 최대 너비를 rem 로 강제 */
+  max-height: 15rem !important;   /* 최대 높이를 rem 로 강제 */
+  width: auto !important;        /* 비율을 유지하며 작아짐 */
+  height: auto !important;
+  margin: 0 auto 1rem;
+  filter: brightness(0) invert(1);
+  pointer-events: none;
+  z-index: 4;
+  margin-bottom: .1rem; /* 타이틀과 간격 조정 */
+}
+/* 오버레이 텍스트와 함께 수직 중앙 정렬을 그대로 유지하기 위해 
+   slider-overlay 에 flex 레이아웃을 활용해도 좋습니다: */
+.slider-overlay {
+  position: absolute;
+  top: 50%; left: 50%;
+  transform: translate(-50%, -50%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  pointer-events: auto;
+  cursor: pointer;
+  z-index: 3;
+}
+/* ── Hover 시 텍스트 강조 효과 ── */
+.slider-overlay:hover {
+  transform: translate(-50%, -60%) scale(1.03);
+}
+.slider-overlay:hover .slide-title-main {
+  text-shadow:
+    0 0.2rem 0.4rem rgba(0,0,0,0.8),
+    0 0.05rem 0.1rem rgba(0,0,0,0.6);
+}
+.slider-overlay:hover .slide-title-sub {
+  text-shadow:
+    0 0.1rem 0.2rem rgba(0,0,0,0.6);
+}
+/* ── Hover 시 로고 강조 효과 ── */
+.slider-overlay .overlay-logo {
+  transition: transform .3s ease, filter .3s ease;
+}
+.slider-overlay:hover .overlay-logo {
+  transform: translateY(-0.5rem) scale(1.1);
+  /* drop-shadow 로 굵은 그림자 효과 */
+  filter: drop-shadow(0 0.4rem 0.6rem rgba(0,0,0,0.8))
+          drop-shadow(0 0.1rem 0.2rem rgba(0,0,0,0.6));
+}
 
 /* arrow 패딩 */
 .arrow {
