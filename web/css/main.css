@@ -102,7 +102,7 @@ a { text-decoration: none; color: inherit; }
 .arrow {
   outline: .2rem solid #add8e6;    /* 테두리 그려서 위치를 봅니다 */
   position:absolute; top:50vh;/* middle of the viewport */ transform:translateY(-50%);
-  background:#0b5264; color:#fff; padding:.5rem; cursor:pointer; z-index:4;
+  background:none; color:#fff; padding:.5rem; cursor:pointer; z-index:4;
 }
 .arrow.left  { left:1rem;  }
 .arrow.right { right:1rem; }
