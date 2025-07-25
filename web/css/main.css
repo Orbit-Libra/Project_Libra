@@ -1,10 +1,10 @@
-/* ../css/main.css */
-/* Reset & 공용 스타일 */
+/* css/main.css */
+/* Reset & scroll-snap */
 /* TODO: px→rem, width/height→vw/vh 통일 */
 :root {
   --color-bg-header: #010002;
   --color-footer-bg: #0d1f2d;
-  --color-logo-text: lab(93.13% -25.51 -8.16);
+  --color-logo-text: lab(69.67% -15.03 -23.49); 
   --color-body-bg: #0b5264;
   --color-nav-text: #0c3f2f;
   --color-highlight: #204461;
@@ -13,172 +13,220 @@
 }
 
 * { box-sizing: border-box; margin: 0; padding: 0; }
- html, body {
-      height: 100%;
-      margin: 0;
-      overflow-y: scroll;
-      scroll-snap-type: y mandatory;
-      scroll-behavior: smooth;
-    }
-    body { font-family: sans-serif; }
-    a { text-decoration: none; color: inherit; }
-
-/* Header */
-#site-header {
-  position: absolute; top: 0; left: 0;
-  width: 100%; padding: 1rem 2rem;
-  background: transparent; color: #fff;
-  display: flex; align-items: center;
-  z-index: 10;
+html, body {
+  height: 100vw;
+  margin: 0;
+  overflow-y: scroll; /* ← 항상 스크롤바가 보이도록 “강제”이게 스크롤한번에 다음페이지로 */
+  scroll-snap-type: y mandatory;
+  scroll-behavior: smooth;
 }
-#site-header .logo { display: flex; align-items: center; cursor: pointer; }
-#site-header .logo img { height: 4.0rem; }
-#site-header .logo span { 
-  color: lab(69.67% -15.03 -23.49);    /* ← 로고 아이콘 색과 동일하게 */
-  font-size: 1.5rem; font-weight: bold; margin-left: 0.5rem; }
-#site-header nav { margin-left: auto;  margin-right: 2cm;}
-#site-header .nav-link {
-  margin-left: 2rem; 
-  transition: color .2s;  color: inherit;
-  text-decoration: none;    /* 기본 밑줄 제거 */
+body { font-family: sans-serif; }
+a { text-decoration: none; color: inherit; }
+
+/*스크롤바 완전삭제*/
+/* body{
+ -ms-overflow-style: none;
+ } */
+ /*스크롤바 완전삭제*/
+/* ::-webkit-scrollbar {
+  display: none;
+} */
+/*특정 부분 스크롤바 없애기*/
+.box{
+   -ms-overflow-style: none;
 }
-#site-header .nav-link:hover { color: lab(69.67% -15.03 -23.49); }
-
-
-/* 섹션 공통 */
-/* TODO: 여기에 헤더·슬라이더·서브그리드·챗봇·푸터 스타일을 rem/vw/vh로 채워 넣기 */
-.section {
-  width: 100vw;
-  height: 100vh;
-  scroll-snap-align: start;
-  position: relative;
-  overflow: hidden;
+.box::-webkit-scrollbar{
+  display:none;
 }
 
+/* Header (injected via fetch) */
+#site-header { position: fixed; top:0; left:0; width:100vw; padding:1rem 4vw;    /* 좌우 2rem → 4vw (브라우저 폭에 따라 유연) */
+  display:flex; align-items:center; background:transparent; color:#fff; z-index:10; }
+#site-header .logo img { height:2.5rem;  }
+#site-header .logo span { color:lab(69.67% -15.03 -23.49); font-size:1.5rem; font-weight:bold;  }
+/* nav 우측 여백 */
+#site-header nav { margin-left:auto; margin-right:2rem;  }
+#site-header .nav-link { margin-left:2rem; color:inherit; text-decoration:none; /* 기본 밑줄 제거 */ transition:color .2s; }
+#site-header .nav-link:hover { color:lab(69.67% -15.03 -23.49);  text-decoration: none; /* 기본 밑줄 제거 */ }
+
+/* Section 공통 부모요소 (슬라이더·3컬럼) */
+.section { width:100%; /* fills its parent without triggering overflow-x */ 
+  height:100%; position:relative;
+  scroll-snap-align:start; overflow: hidden;
+  /* overflow:hidden;  >>arrow 오른쪽버튼때문에 주석처리>>영향없는데??*/
+}
+.sections-wrapper {
+  scroll-snap-type: y mandatory;
+  scroll-behavior: smooth;
+}
+.section.slider {
+  height: 100vh;   /* ← make the slider section fill the viewport */
+}
 /* HERO SLIDER */
-.slider {
-  position: relative;    /* overflow:visible 위해서 */
-  overflow: visible;     /* 양쪽 arrow가 잘리지 않도록 */
-  display: flex;
-}
-.slides { display: flex; width: 300%; height: 100%; transition: transform .6s ease; }
-.slide { flex: 1 0 100%; }
+.slider { position:relative; overflow: visible;} /*부모컨테이너*/
+.slides { display:flex; width:300%; height:100%; transition:transform .6s ease; }
+.slide { flex:1 0 100%; }
 .placeholder-slide {
-  width: 100vw;
-  height: 100vh;
-  background: #111;
-  color: #fff;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 2rem;
+  width:100vw; height:100vh; background:#111; color:#fff;
+  display:flex; align-items:center; justify-content:center; font-size:2rem;
 }
+
+/* arrow 패딩 */
 .arrow {
+  outline: 2px solid #add8e6;    /* 테두리 그려서 위치를 봅니다 */
+  position:absolute; top:50vh;/* middle of the viewport */ transform:translateY(-50%);
+  background:#0b5264; color:#fff; padding:.5rem; cursor:pointer; z-index:20;
+}
+.arrow.left  { left:1rem;  }
+.arrow.right { right:1rem; }
+
+
+/* THREE-COLUMN */
+.sub1 { background-image: url('../images/pexels-olenkabohovyk-3646172.jpg'); }
+.sub2 { background-image: url('../images/pexels-yuliia-tretynychenko-211350148-11761083.jpg'); }
+.sub3 { background-image: url('../images/pexels-tima-miroshnichenko-9572464.jpg'); }
+
+.subgrid { display:flex; width:100%; height:100vh; }
+.sub { flex:1; position:relative; cursor:pointer;  overflow: hidden;
+  background-size: cover; background-position: center;
+  transition: filter .4s ease, transform .4s ease;}
+
+/* 1) Put the background into a ::before layer */
+.sub::before {
+  content: "";
   position: absolute;
-  top: 50%;
-  transform: translateY(-50%);
-  background: rgba(0,0,0,0.4);
-  color: #fff;
-  padding: 0.5rem;
-  cursor: pointer;
-  z-index: 20;
+  inset: 0;                     /* top/right/bottom/left = 0 */
+  background-image: var(--bg);  /* or url(...) directly */
+  background-size: cover;
+  background-position: center;
+  transition: filter .4s ease, transform .4s ease;
+  z-index: 0;                   /* behind the text */
 }
-.arrow.left { left: 1rem; }
-.arrow.right { right: 1rem; }
 
-
-
-/* Three-column */
-.subgrid {
-  display: flex; width: 100vw; height: 100vh;
+/* 2) On hover, blur/brigten only the ::before */
+.sub:hover::before {
+  filter: brightness(50%) blur(2px);
+  transform: scale(1.02);
 }
-.sub {
-  flex: 1;  position: relative; cursor: pointer;
-}
-.sub:nth-child(1) { background: #add8e6; }
-.sub:nth-child(2) { background: #7a5656; }
-.sub:nth-child(3) { background: #f5a623; }
+
+/*기본 텍스트*/
 .sub-title {
-  position: absolute; bottom: 1rem; left: 1rem;
-  color: #fff; font-size: 1.2rem;
+  position:absolute; 
+  bottom:6rem; 
+  transform: translateX(-50%); /* 텍스트 너비의 절반만큼 왼쪽으로 이동해서 완전 중앙 정렬 */
+  left:50%; /* 부모 가로의 50% 지점 */
+  text-align: center; /* 줄바꿈된 텍스트도 중앙 정렬 */
+  color:#fff; font-size:1.2rem; z-index: 1;   /* above the ::before */
+  text-shadow: 0 0 .5rem rgba(0,0,0,0.7); transition: transform .4s ease, color .4s ease;
+  color: #fff !important;  /* force white */
 }
-.sub:hover { opacity: 0.9; }
+/*첫줄 큰글씨*/
+.sub-title-main {
+  font-size: 4rem;
+  font-weight: bold;
+}
+/*둘째줄 작은글씨*/
+.sub-title-sub {
+  font-size: 2rem;
+  opacity: .8;
+}
 
-/* Footer */
+/*Hover 효과*/
+.sub:hover { 
+  filter: brightness(50%) blur(.2rem);
+  transform: scale(1.02);
+  /* opacity:.9; */ } 
+.sub:hover .sub-title {
+  transform: translateY(-1rem);
+  color: #fff/* 마우스후버글씨칼라 강조 */
+}
+/* 클릭 영역 전체가 링크 */
+.sub:active .sub-title {
+  color: #fff;
+}
+/* 1) 기본 배경 레이어 뒤집기 */
+.sub1::before { transform: scaleX(-1);}
+/* 2) Hover 시에도 반전 + 확대/블러 유지 */
+.sub1:hover::before {
+  filter: brightness(50%) blur(2px);
+  transform: scaleX(-1) scale(1.02);
+}
+.sub2 .sub-title {
+  bottom: 6rem !important;
+  top: auto   !important;
+  color: #fff !important;
+}
+
+
+/* FOOTER */
 #site-footer {
-  position: absolute; bottom: 0;
-  width: 100vw; text-align: center;
-  padding: 1rem 0; background: #0d1f2d; color: #fff;
-  scroll-snap-align: start; /* 원하면 스크롤 스냅만 유지 */
+  width:100vw; padding:1rem 0; background:#0d1f2d; color:#fff;
+  text-align:center; scroll-snap-align:start;
 }
 
-
-/* Chatbot */
-.chatbot {
-  position: fixed; bottom: 1rem; right: 1rem;
-  z-index: 30; cursor: pointer; /* 클릭 포인터 유지 */
-}
-.chat-icon {
-  width: 3.75rem;    /* 60px */
-  height: 3.75rem;   /* 60px */
-  overflow: hidden; border-radius: 50%;/* 원형 유지 */
-}
-#chatbot-img {
-  width: 100%; height: 100%; object-fit: contain;
-}
-/* chat-Body: 스크롤 가능한 대화 영역 */
-.chat-body {
-  flex: 1; padding: 0.5rem;
-  overflow-y: auto; background: #f9f9f9;
-}
+/* CHATBOT */
+.chatbot { position:fixed; bottom:1rem; right:1rem; z-index:30; cursor:pointer; }
+.chat-icon { width:7.5rem; height:7.5rem; border-radius:50%; overflow:hidden; }
+#chatbot-img { width:100%; height:100%; object-fit:contain; transform: scaleX(-1);  /* ← 좌우 반전(수평 뒤집기) */}
+/* Chat Window */
 .chat-window {
-  position: fixed; bottom: 1rem; right: 1rem;
-  width: 18.75rem;      /* 300px */
-  height: 80vh;         /* 화면 높이의 80% */
-  background: #fff; 
-  box-shadow: -2px 2px 10px rgba(202, 25, 25, 0.2);
-  display: flex; flex-direction: column;
-  transform: translateY(100%);
-  transition: transform .3s ease-in-out;
-  z-index: 29;
+  position:fixed; bottom:1rem; right:1rem; width:18.75rem; /* 300px → 18.75rem */ 
+  height:80vh; background:#fff; box-shadow:-2px 2px 10px rgba(0,0,0,0.2);
+  display:flex; flex-direction:column; transform:translateY(calc(100% + 2rem));  /* 2rem = chatToggle + gap, tweak as needed */
+  transition:transform .3s ease-in-out; z-index:29;
 }
-.chat-window.open {
-  transform: translateY(0);    /* 열릴 때 제자리로 */
-}
-/* chat-Header: 제목 + 닫기 */
+.chat-window.open { transform:translateY(0); }
 .chat-header {
-  background: #009fe3;
-  color: #85e3f3;
-  padding: .5rem;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
+  background:lab(69.67% -15.03 -23.49); color:#fff; padding:.5rem;
+  display:flex; justify-content:space-between; align-items:center;
 }
-#chatCloseBtn {
-  background: none; border: none;
-  color: #fff; font-size: 1.2rem; cursor: pointer;
+#chatCloseBtn {background:none; border:none; color:#fff; font-size:1.2rem; cursor:pointer; }
+
+/*  Firefox */
+.chat-body {
+  scrollbar-width: none;        /* Firefox 전용 */
+  -ms-overflow-style: none;     /* IE 10+ 전용 */
 }
-/* Input: 고정 하단 */
-.chat-input {
-  display: flex; border-top: 1px solid #ddd;
+.chat-body {background:#f9f9f9; flex:1; padding:.5rem; overflow-y: auto;}
+/*  챗창 내부 스크롤바 숨기기 (WebKit 브라우저) */
+.chat-body::-webkit-scrollbar {
+  width: 0;
+  height: 0;
 }
-#chatInput {
-  flex: 1; border: none;
-  padding: 0.5rem; font-size: 0.9rem;
+.chat-body::-webkit-scrollbar-track {
+  display: none;
 }
-#chatInput:focus { outline: none;}
-#chatSendBtn {
-  padding: 0.75rem; border: none;
-  background: #009fe3; color: #fff;
-  cursor: pointer;
+.chat-body::-webkit-scrollbar-thumb {
+  display: none;
 }
-#chatSendBtn:hover {background: #007bb5;}
+
+.chat-input { display:flex; border-top:0.0625rem solid lab(69.67% -15.03 -23.49); /* 1px → 0.0625rem 메세지칸 테투리실선*/ }
+#chatInput { color: #6363c2;/* 컬러 */font-size:.9rem; flex:1; border:none; padding:.5rem;  }
+/* 메세지를 입력하세요... */
+#chatInput::placeholder { 
+  color: lab(69.67% -15.03 -23.49); }
+#chatInput:focus { outline:none; }
+#chatSendBtn { padding:0 .75rem; border:none; background:lab(69.67% -15.03 -23.49); color:#fff; cursor:pointer; }
+#chatSendBtn:hover { background:lab(69.67% -15.03 -23.49); }
 
 
 
 /* Responsive */
 @media(max-width:768px) {
-  #site-header .nav-link { margin-left: 1rem; font-size: .9rem; }
-  .arrow { padding: .3rem; }
+  #site-header .nav-link { margin-left:1rem; font-size:.9rem; }
+  .arrow { padding:.3rem; }
 }
 
+
+/*추후 위부터 테스트해보기 chat빼고 다른곳 다 overflow있는애들위주로 그럼 스크롤하나되긋지*/
+/* 챗봇 메시지 영역(.chat-body)만 스크롤바 숨기기 */
+/* .chat-body {
+  overflow-y: auto;           /* 내부 스크롤은 가능 */
+  /* scrollbar-width: none;      Firefox 전용 */
+  /* -ms-overflow-style: none;   IE 10+ 전용 */
+/* }
+
+.chat-body::-webkit-scrollbar {  /* Chrome, Safari 등 WebKit 전용 */
+  /* width: 0;
+  height: 0; */
+/*}  */
