@@ -9,7 +9,7 @@ def main():
     print("[RUNNING] Predictor 파이프라인 시작")
     start_time = time.time()
 
-    config_name = os.getenv("MODEL_CONFIG_NAME", "Num01_Config_RFR.json")
+    config_name = os.getenv("MODEL_CONFIG_NAME", "Num02_Config_XGB.json")
     controller = Controller(config_name=config_name)
     controller.run()
 
@@ -21,7 +21,7 @@ def userdatapredict():
 
     # 유저용 TableBuilder는 Num01 모델을 기반으로 하므로 해당 컨피그 로드
     config_path = os.path.join(
-        os.path.dirname(__file__), "..", "_Configs", "Num01_Config_RFR.json"
+        os.path.dirname(__file__), "..", "_Configs", "Num01_Config_XGB.json"
     )
     with open(config_path, "r", encoding="utf-8") as f:
         config = json.load(f)
