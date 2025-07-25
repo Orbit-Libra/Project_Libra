@@ -35,7 +35,7 @@
             border-radius: 8px;
             padding: 15px;
             position: relative;
-            min-width: 0; /* flex 아이템이 축소될 수 있도록 */
+            min-width: 0;
         }
 
         .chart-side {
@@ -44,7 +44,7 @@
             border-radius: 8px;
             padding: 12px;
             position: relative;
-            min-width: 0; /* flex 아이템이 축소될 수 있도록 */
+            min-width: 0;
         }
 
         .chart-main h4, .chart-side h4 {
@@ -66,12 +66,80 @@
             height: 280px;
             width: 100%;
             overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
         }
 
-        /* 차트 캔버스 크기 제한 */
+        .correlation-info {
+            margin-top: 10px;
+            text-align: center;
+            font-size: 12px;
+            color: #495057;
+            font-weight: 500;
+        }
+
+        .chart-wrapper {
+            flex: 1;
+            width: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
         #mainChart, #sideChart {
             max-width: 100% !important;
             max-height: 100% !important;
+        }
+
+        /* 출력 형식 설정 스타일 */
+        .chart-type-options {
+            background: #f8f9fa;
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 10px;
+            border: 1px solid #e9ecef;
+        }
+
+        .chart-type-group {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            align-items: stretch;
+        }
+
+        .chart-type-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px;
+            border-radius: 6px;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            border: 1px solid transparent;
+        }
+
+        .chart-type-item:hover {
+            background: rgba(66, 165, 245, 0.1);
+            border-color: rgba(66, 165, 245, 0.3);
+        }
+
+        .chart-type-item label {
+            font-size: 0.9rem;
+            color: #495057;
+            font-weight: 500;
+            cursor: pointer;
+            margin: 0;
+            flex: 1;
+        }
+
+        .chart-type-item input[type="radio"] {
+            margin: 0;
+        }
+
+        .chart-type-item input[type="radio"]:checked + label {
+            color: #42a5f5;
+            font-weight: 600;
         }
 
         /* Y축 옵션 스타일 */
@@ -304,6 +372,26 @@
                     </div>
 
                     <div class="panel-section">
+                        <h3>출력 형식 설정</h3>
+                        <div class="chart-type-options">
+                            <div class="chart-type-group">
+                                <div class="chart-type-item">
+                                    <input type="radio" id="chartTypeBar" name="chartType" value="bar" checked onchange="onChartTypeChange()">
+                                    <label for="chartTypeBar">막대형 그래프</label>
+                                </div>
+                                <div class="chart-type-item">
+                                    <input type="radio" id="chartTypeLine" name="chartType" value="line" onchange="onChartTypeChange()">
+                                    <label for="chartTypeLine">함수형 그래프</label>
+                                </div>
+                                <div class="chart-type-item">
+                                    <input type="radio" id="chartTypeScatter" name="chartType" value="scatter" onchange="onChartTypeChange()">
+                                    <label for="chartTypeScatter">산점도 그래프</label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="panel-section">
                         <h3>축 설정</h3>
                         
                         <div class="form-group">
@@ -312,6 +400,13 @@
                                 <option value="">선택하세요</option>
                                 <!-- 동적으로 컬럼 옵션이 추가됨 -->
                             </select>
+                        </div>
+
+                        <div class="form-group">
+                            <div class="checkbox-group">
+                                <input type="checkbox" id="yearFilterCheckbox" onchange="onAxisChange()">
+                                <label for="yearFilterCheckbox">연도별 필터링 적용</label>
+                            </div>
                         </div>
 
                         <div class="form-group">
@@ -384,9 +479,9 @@
 
                     <div class="chart-container">
                         <div class="chart-split">
-                            <!-- 메인 차트 (80%) -->
+                            <!-- 메인 차트 (75%) -->
                             <div class="chart-main">
-                                <h4>데이터 분포 (막대그래프)</h4>
+                                <h4 id="mainChartTitle">데이터 분포 (막대그래프)</h4>
                                 <div class="chart-canvas-container">
                                     <canvas id="mainChart"></canvas>
                                     <div class="chart-loading" id="mainChartLoading" style="display: none;">
@@ -403,21 +498,26 @@
                                 </div>
                             </div>
 
-                            <!-- 사이드 차트 (20%) -->
+                            <!-- 사이드 차트 (25%) -->
                             <div class="chart-side">
                                 <h4>상관계수</h4>
                                 <div class="side-chart-container">
-                                    <canvas id="sideChart"></canvas>
-                                    <div class="chart-loading" id="sideChartLoading" style="display: none;">
-                                        <div class="loading-spinner"></div>
-                                        <p>계산 중...</p>
-                                    </div>
-                                    <div class="chart-placeholder" id="sideChartPlaceholder">
-                                        <div class="placeholder-content">
-                                            <div class="placeholder-icon">📈</div>
-                                            <h5>상관계수</h5>
-                                            <p>데이터 분석 후 표시</p>
+                                    <div class="chart-wrapper">
+                                        <canvas id="sideChart"></canvas>
+                                        <div class="chart-loading" id="sideChartLoading" style="display: none;">
+                                            <div class="loading-spinner"></div>
+                                            <p>계산 중...</p>
                                         </div>
+                                        <div class="chart-placeholder" id="sideChartPlaceholder">
+                                            <div class="placeholder-content">
+                                                <div class="placeholder-icon">📈</div>
+                                                <h5>상관계수</h5>
+                                                <p>데이터 분석 후 표시</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="correlation-info" id="correlationInfo" style="display: none;">
+                                        상관도: <span id="correlationPercent">-</span>%
                                     </div>
                                 </div>
                             </div>
@@ -433,8 +533,16 @@
                                     <span class="value" id="currentYear">전체</span>
                                 </div>
                                 <div class="info-item">
+                                    <span class="label">출력 형식:</span>
+                                    <span class="value" id="currentChartType">막대형 그래프</span>
+                                </div>
+                                <div class="info-item">
                                     <span class="label">X축:</span>
                                     <span class="value" id="currentXAxis">-</span>
+                                </div>
+                                <div class="info-item">
+                                    <span class="label">연도별 필터링:</span>
+                                    <span class="value" id="currentYearFilter">미적용</span>
                                 </div>
                                 <div class="info-item">
                                     <span class="label">Y축:</span>
