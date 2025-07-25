@@ -46,7 +46,7 @@ window.addEventListener('DOMContentLoaded', () => {
     idx = (idx + 1) % total;
     showSlide(idx);
   }, 10000);
-});
+
 
   // 3컬럼 클릭 페이지1,2,3으로 이동이벤트
   document.querySelectorAll('.sub').forEach(el => {
@@ -82,7 +82,7 @@ window.addEventListener('DOMContentLoaded', () => {
   }
   chatSendBtn.addEventListener('click', sendMessage);
   chatInput.addEventListener('keydown', e=>{
-    if (e.key==='Enter'){ e.preventDefault(); sendMessage(); }
+    if (e.key==='Enter'){ e.preventDefault(); sendMessage();  }
   });
 });
 
