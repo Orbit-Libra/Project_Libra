@@ -87,7 +87,7 @@ a { text-decoration: none; color: inherit; }
   pointer-events: none;
 }
 .slide-title-main {
-  font-size: 2.5rem;
+  font-size: 3.5rem;
   font-weight: bold;
   text-shadow: 0 0 .5rem rgba(0,0,0,0.7);
 }
@@ -267,3 +267,27 @@ a { text-decoration: none; color: inherit; }
 .box::-webkit-scrollbar{
   display:none; */
 /* } */
+
+/*임시 오버레이 스타일 추가>>추후 로그인가능자 페이지연동 */
+/* 10초 문구용 풀스크린 오버레이 */
+#temp-overlay {
+  position: fixed;
+  top: 0; left: 0;
+  width: 100vw; height: 100vh;
+  background: rgba(0,0,0,0.85);
+  color: #fff;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-size: 1.8rem;
+  text-align: center;
+  padding: 2rem;
+  z-index: 9999;
+  visibility: hidden;    /* 처음엔 숨김 */
+  opacity: 0;
+  transition: opacity .3s ease;
+}
+#temp-overlay.show {
+  visibility: visible;
+  opacity: 1;
+}

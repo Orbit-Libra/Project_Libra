@@ -50,11 +50,40 @@ window.addEventListener('DOMContentLoaded', () => {
 
   // 3컬럼 클릭 페이지1,2,3으로 이동이벤트
   document.querySelectorAll('.sub').forEach(el => {
-    el.addEventListener('click', () => {
-      const url = el.dataset.link;
-      if (url) window.location.href = url;
+  //<!--/*3번카드 >>임시 오버레이 스타일 추가>>추후 로그인가능자 페이지연동 */-->
+ if (el.classList.contains('sub3')) {
+      // 3번 카드만 별도 처리
+      el.addEventListener('click', e => {
+        e.preventDefault();
+        const today = new Date().toISOString().slice(0,10); // YYYY-MM-DD
+        const visited = localStorage.getItem('sub3AccessDate');
+
+        if (visited === today) {
+          // 이미 오늘 본 적 있으면 바로 이동
+          window.location.href = el.dataset.link;
+        } else {
+          // 처음 보는 날이면 오버레이 보여주고 10초 후 진입
+          const overlay = document.getElementById('temp-overlay');
+          overlay.classList.add('show');
+
+          // 오늘 날짜 저장
+          localStorage.setItem('sub3AccessDate', today);
+
+          // 10초 후 페이지 이동
+          setTimeout(() => {
+            overlay.classList.remove('show');
+            window.location.href = el.dataset.link;
+          }, 10000);
+        }
+      });
+    } else {
+      // sub1, sub2: 원래 이동
+      el.addEventListener('click', () => {
+        const url = el.dataset.link;
+        if (url) window.location.href = url;
+      });
+    }
   });
-});
 
   // 3) Chatbot Toggle
   const chatToggle   = document.getElementById('chatToggle');
