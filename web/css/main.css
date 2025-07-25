@@ -1,5 +1,4 @@
 /* css/main.css */
-/* Reset & scroll-snap */
 /* TODO: px→rem, width/height→vw/vh 통일 */
 :root {
   --color-bg-header: #010002;
@@ -12,221 +11,542 @@
   --font-sans: 'Noto Sans KR', sans-serif;
 }
 
-* { box-sizing: border-box; margin: 0; padding: 0; }
+/* Reset & scroll-snap */
+* { 
+  box-sizing: border-box; 
+  margin: 0; 
+  padding: 0; 
+}
+
 html, body {
-  height: 100vw;
+  height: 100vh; /* 100vw -> 100vh로 수정 */
+  width: 100vw; /* 100% -> 100vw로 수정 */
   margin: 0;
-  overflow-y: scroll; /* ← 항상 스크롤바가 보이도록 “강제”이게 스크롤한번에 다음페이지로 */
+  padding: 0;
+  overflow-x: hidden; /* 가로 스크롤 완전 제거 */
+  overflow-y: auto; /* 세로 스크롤만 허용 */
   scroll-snap-type: y mandatory;
   scroll-behavior: smooth;
 }
-body { font-family: sans-serif; }
-a { text-decoration: none; color: inherit; }
 
-/*스크롤바 완전삭제*/
-/* body{
- -ms-overflow-style: none;
- } */
- /*스크롤바 완전삭제*/
-/* ::-webkit-scrollbar {
-  display: none;
-} */
-/*특정 부분 스크롤바 없애기*/
-.box{
-   -ms-overflow-style: none;
-}
-.box::-webkit-scrollbar{
-  display:none;
+body { 
+  font-family: sans-serif; 
+  min-height: 100vh; /* 최소 높이 보장 */
 }
 
-/* Header (injected via fetch) */
-#site-header { position: fixed; top:0; left:0; width:100vw; padding:1rem 4vw;    /* 좌우 2rem → 4vw (브라우저 폭에 따라 유연) */
-  display:flex; align-items:center; background:transparent; color:#fff; z-index:10; }
-#site-header .logo img { height:2.5rem;  }
-#site-header .logo span { color:lab(69.67% -15.03 -23.49); font-size:1.5rem; font-weight:bold;  }
-/* nav 우측 여백 */
-#site-header nav { margin-left:auto; margin-right:2rem;  }
-#site-header .nav-link { margin-left:2rem; color:inherit; text-decoration:none; /* 기본 밑줄 제거 */ transition:color .2s; }
-#site-header .nav-link:hover { color:lab(69.67% -15.03 -23.49);  text-decoration: none; /* 기본 밑줄 제거 */ }
-
-/* Section 공통 부모요소 (슬라이더·3컬럼) */
-.section { width:100%; /* fills its parent without triggering overflow-x */ 
-  height:100%; position:relative;
-  scroll-snap-align:start; overflow: hidden;
-  /* overflow:hidden;  >>arrow 오른쪽버튼때문에 주석처리>>영향없는데??*/
+a { 
+  text-decoration: none; 
+  color: inherit; 
 }
+
+/* Header */
+#site-header { 
+  position: fixed; 
+  top: 0; 
+  left: 0; 
+  width: 100vw; /* 100% -> 100vw */
+  padding: 1rem 4vw;
+  display: flex; 
+  align-items: center; 
+  background: transparent; 
+  color: #fff; 
+  z-index: 10; 
+  transition: transform 0.3s ease-in-out; 
+  will-change: transform;
+}
+
+#site-header.hidden {
+  transform: translateY(-100%);
+}
+
+#site-header .logo { 
+  cursor: pointer; 
+  display: flex; 
+  align-items: center; 
+}
+
+#site-header .logo img { 
+  height: 2.5rem;
+}
+
+#site-header .logo span { 
+  color: lab(69.67% -15.03 -23.49); 
+  font-size: 1.5rem; 
+  font-weight: bold;  
+}
+
+#site-header nav { 
+  margin-left: auto; 
+  margin-right: 2rem;  
+}
+
+#site-header .nav-link { 
+  margin-left: 2rem; 
+  color: #fff; 
+  text-decoration: none; 
+  transition: color .2s; 
+}
+
+#site-header .nav-link:hover { 
+  color: lab(69.67% -15.03 -23.49); 
+  text-decoration: none; 
+}
+
+/* Section 공통 부모요소 */
+.section { 
+  width: 100vw; /* 100% -> 100vw */
+  height: 100vh;
+  position: relative;
+  scroll-snap-align: start;
+  overflow: hidden; /* 내부 스크롤 방지 */
+}
+
+/* sections-wrapper 수정 */
 .sections-wrapper {
+  width: 100vw;
+  height: 100vh;
+  overflow-x: hidden; /* 가로 스크롤 완전 차단 */
+  overflow-y: auto; /* 세로 스크롤만 허용 */
   scroll-snap-type: y mandatory;
   scroll-behavior: smooth;
 }
+
 .section.slider {
-  height: 100vh;   /* ← make the slider section fill the viewport */
+  height: 100vh;
+  width: 100vw;
 }
+
 /* HERO SLIDER */
-.slider { position:relative; overflow: visible;} /*부모컨테이너*/
-.slides { display:flex; width:300%; height:100%; transition:transform .6s ease; }
-.slide { flex:1 0 100%; }
-.placeholder-slide {
-  width:100vw; height:100vh; background:#111; color:#fff;
-  display:flex; align-items:center; justify-content:center; font-size:2rem;
+.slider {
+  position: relative;
+  overflow: hidden;
+  height: 100vh;
+  width: 100vw;
 }
 
-/* arrow 패딩 */
-.arrow {
-  outline: 2px solid #add8e6;    /* 테두리 그려서 위치를 봅니다 */
-  position:absolute; top:50vh;/* middle of the viewport */ transform:translateY(-50%);
-  background:#0b5264; color:#fff; padding:.5rem; cursor:pointer; z-index:20;
-}
-.arrow.left  { left:1rem;  }
-.arrow.right { right:1rem; }
-
-
-/* THREE-COLUMN */
-.sub1 { background-image: url('../images/pexels-olenkabohovyk-3646172.jpg'); }
-.sub2 { background-image: url('../images/pexels-yuliia-tretynychenko-211350148-11761083.jpg'); }
-.sub3 { background-image: url('../images/pexels-tima-miroshnichenko-9572464.jpg'); }
-
-.subgrid { display:flex; width:100%; height:100vh; }
-.sub { flex:1; position:relative; cursor:pointer;  overflow: hidden;
-  background-size: cover; background-position: center;
-  transition: filter .4s ease, transform .4s ease;}
-
-/* 1) Put the background into a ::before layer */
-.sub::before {
-  content: "";
+.slider .slide {
   position: absolute;
-  inset: 0;                     /* top/right/bottom/left = 0 */
-  background-image: var(--bg);  /* or url(...) directly */
-  background-size: cover;
+  top: 0; 
+  left: 0;
+  width: 100vw; /* 100% -> 100vw */
+  height: 100vh; /* 100% -> 100vh */
+  opacity: 0; 
+  z-index: 1;
+  transition: opacity 1s ease;
+  overflow: hidden; /* 이미지 넘침 방지 */
+}
+
+.slider .slide.active {
+  opacity: 1; 
+  z-index: 2;
+}
+
+/* 이미지 꽉 채우기 - 중요한 수정 */
+.slider .slide img {
+  width: 100vw;
+  height: 100vh;
+  object-fit: cover;
+  object-position: center;
+  display: block; /* inline 요소 여백 제거 */
+}
+
+/* 텍스트 오버레이 */
+.slider-overlay {
+  position: absolute;
+  top: 50%; 
+  left: 50%;
+  transform: translate(-50%, -50%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  color: #fff;
+  z-index: 3;
+  pointer-events: auto;
+  cursor: pointer;
+  transition: transform .3s ease, text-shadow .3s ease;
+}
+
+.slide-title-main {
+  font-size: 3.5rem;
+  font-weight: bold;
+  text-shadow: 0 0 .5rem rgba(0,0,0,0.7);
+  margin-bottom: .5rem;
+}
+
+.slide-title-sub {
+  font-size: 1.2rem;
+  text-shadow: 0 0 .5rem rgba(0,0,0,0.7);
+}
+
+.slider-overlay .overlay-logo {
+  display: block;
+  max-width: 15rem !important;
+  max-height: 15rem !important;
+  width: auto !important;
+  height: auto !important;
+  margin: 0 auto 1rem;
+  filter: brightness(0) invert(1);
+  pointer-events: none;
+  z-index: 4;
+  margin-bottom: .1rem;
+  transition: transform .3s ease, filter .3s ease;
+}
+
+/* Hover 효과 */
+.slider-overlay:hover {
+  transform: translate(-50%, -60%) scale(1.03);
+}
+
+.slider-overlay:hover .slide-title-main {
+  text-shadow:
+    0 0.2rem 0.4rem rgba(0,0,0,0.8),
+    0 0.05rem 0.1rem rgba(0,0,0,0.6);
+}
+
+.slider-overlay:hover .slide-title-sub {
+  text-shadow: 0 0.1rem 0.2rem rgba(0,0,0,0.6);
+}
+
+.slider-overlay:hover .overlay-logo {
+  transform: translateY(-0.5rem) scale(1.1);
+  filter: drop-shadow(0 0.4rem 0.6rem rgba(0,0,0,0.8))
+          drop-shadow(0 0.1rem 0.2rem rgba(0,0,0,0.6));
+}
+
+/* Arrow 버튼 */
+.arrow {
+  position: absolute; 
+  top: 50vh;
+  transform: translateY(-50%);
+  background: none; 
+  color: #fff; 
+  padding: .5rem; 
+  cursor: pointer; 
+  z-index: 4;
+  border: .2rem solid #add8e6;
+}
+
+.arrow.left  { 
+  left: 1rem;  
+}
+
+.arrow.right { 
+  right: 1rem; 
+}
+
+/* THREE-COLUMN - 중요한 수정 */
+.subgrid { 
+  display: flex; 
+  width: 100vw; /* 100% -> 100vw */
+  height: 100vh; 
+  overflow: hidden; /* 내부 스크롤 방지 */
+}
+
+.sub { 
+  flex: 1; 
+  position: relative; 
+  cursor: pointer;  
+  overflow: hidden;
+  height: 100vh; /* 높이 명시 */
+}
+
+/* 이미지 수정 */
+.sub-img {
+  width: 100%;
+  height: 100vh; /* 100% -> 100vh */
+  object-fit: cover;
+  object-position: center;
+  display: block; /* inline 요소 여백 제거 */
+  transition: filter .4s ease, transform .4s ease;
+}
+
+/* Background 레이어 */
+.sub::before {
+  content: ""; 
+  position: absolute;
+  inset: 0;
+  background-image: var(--bg);
+  background-size: cover; 
   background-position: center;
   transition: filter .4s ease, transform .4s ease;
-  z-index: 0;                   /* behind the text */
+  z-index: 0;
 }
 
-/* 2) On hover, blur/brigten only the ::before */
-.sub:hover::before {
-  filter: brightness(50%) blur(2px);
-  transform: scale(1.02);
+/* 텍스트 오버레이 */
+.sub-overlay {
+  position: absolute; 
+  bottom: 3rem; 
+  left: 50%;
+  transform: translateX(-50%);
+  text-align: center;
+  color: #fff !important;
+  font-size: 1.2rem; 
+  z-index: 2;
+  text-shadow: 0 0 .5rem rgba(0,0,0,0.7); 
+  transition: transform .4s ease, color .4s ease;
+  pointer-events: none;
 }
 
-/*기본 텍스트*/
-.sub-title {
-  position:absolute; 
-  bottom:6rem; 
-  transform: translateX(-50%); /* 텍스트 너비의 절반만큼 왼쪽으로 이동해서 완전 중앙 정렬 */
-  left:50%; /* 부모 가로의 50% 지점 */
-  text-align: center; /* 줄바꿈된 텍스트도 중앙 정렬 */
-  color:#fff; font-size:1.2rem; z-index: 1;   /* above the ::before */
-  text-shadow: 0 0 .5rem rgba(0,0,0,0.7); transition: transform .4s ease, color .4s ease;
-  color: #fff !important;  /* force white */
-}
-/*첫줄 큰글씨*/
 .sub-title-main {
-  font-size: 4rem;
+  font-size: 3rem;
   font-weight: bold;
 }
-/*둘째줄 작은글씨*/
+
 .sub-title-sub {
   font-size: 2rem;
   opacity: .8;
 }
 
-/*Hover 효과*/
-.sub:hover { 
+/* Hover 효과 */
+.sub:hover .sub-img { 
   filter: brightness(50%) blur(.2rem);
   transform: scale(1.02);
-  /* opacity:.9; */ } 
-.sub:hover .sub-title {
-  transform: translateY(-1rem);
-  color: #fff/* 마우스후버글씨칼라 강조 */
 }
-/* 클릭 영역 전체가 링크 */
+
+.sub:hover .sub-overlay {
+  transform: translateX(-50%) translateY(-1rem);
+  color: #fff;
+}
+
 .sub:active .sub-title {
   color: #fff;
 }
-/* 1) 기본 배경 레이어 뒤집기 */
-.sub1::before { transform: scaleX(-1);}
-/* 2) Hover 시에도 반전 + 확대/블러 유지 */
+
+/* sub1 배경 반전 */
+.sub1::before { 
+  transform: scaleX(-1);
+}
+
 .sub1:hover::before {
   filter: brightness(50%) blur(2px);
   transform: scaleX(-1) scale(1.02);
 }
+
 .sub2 .sub-title {
-  bottom: 6rem !important;
-  top: auto   !important;
+  bottom: 3rem !important;
+  top: auto !important;
   color: #fff !important;
 }
 
-
 /* FOOTER */
 #site-footer {
-  width:100vw; padding:1rem 0; background:#0d1f2d; color:#fff;
-  text-align:center; scroll-snap-align:start;
+  width: 100vw; /* 100vw로 수정 */
+  padding: 1rem 0; 
+  background: var(--color-footer-bg,#0d1f2d); 
+  color: #fff;
+  text-align: center; 
+  scroll-snap-align: start;
 }
 
 /* CHATBOT */
-.chatbot { position:fixed; bottom:1rem; right:1rem; z-index:30; cursor:pointer; }
-.chat-icon { width:7.5rem; height:7.5rem; border-radius:50%; overflow:hidden; }
-#chatbot-img { width:100%; height:100%; object-fit:contain; transform: scaleX(-1);  /* ← 좌우 반전(수평 뒤집기) */}
+.chatbot { 
+  position: fixed; 
+  bottom: 1rem; 
+  right: 1rem; 
+  z-index: 200; 
+  cursor: pointer; 
+}
+
+.chat-icon { 
+  width: 7.5rem; 
+  height: 7.5rem; 
+  border-radius: 50%; 
+  overflow: hidden; 
+}
+
+#chatbot-img { 
+  width: 100%; 
+  height: 100%; 
+  object-fit: contain; 
+  transform: scaleX(-1);
+}
+
 /* Chat Window */
 .chat-window {
-  position:fixed; bottom:1rem; right:1rem; width:18.75rem; /* 300px → 18.75rem */ 
-  height:80vh; background:#fff; box-shadow:-2px 2px 10px rgba(0,0,0,0.2);
-  display:flex; flex-direction:column; transform:translateY(calc(100% + 2rem));  /* 2rem = chatToggle + gap, tweak as needed */
-  transition:transform .3s ease-in-out; z-index:29;
+  position: fixed; 
+  bottom: 1rem; 
+  right: 1rem; 
+  width: 18.75rem;
+  height: 80vh; 
+  background: #fff; 
+  box-shadow: -2px 2px 10px rgba(0,0,0,0.2);
+  display: flex; 
+  flex-direction: column; 
+  transform: translateY(calc(100% + 2rem));
+  transition: transform .3s ease-in-out; 
+  z-index: 29;
 }
-.chat-window.open { transform:translateY(0); }
-.chat-header {
-  background:lab(69.67% -15.03 -23.49); color:#fff; padding:.5rem;
-  display:flex; justify-content:space-between; align-items:center;
-}
-#chatCloseBtn {background:none; border:none; color:#fff; font-size:1.2rem; cursor:pointer; }
 
-/*  Firefox */
-.chat-body {
-  scrollbar-width: none;        /* Firefox 전용 */
-  -ms-overflow-style: none;     /* IE 10+ 전용 */
+.chat-window.open { 
+  transform: translateY(0); 
 }
-.chat-body {background:#f9f9f9; flex:1; padding:.5rem; overflow-y: auto;}
-/*  챗창 내부 스크롤바 숨기기 (WebKit 브라우저) */
+
+.chat-header {
+  background: lab(69.67% -15.03 -23.49); 
+  color: #fff; 
+  padding: .5rem;
+  display: flex; 
+  justify-content: space-between; 
+  align-items: center;
+}
+
+#chatCloseBtn {
+  background: none; 
+  border: none; 
+  color: #fff; 
+  font-size: 1.2rem; 
+  cursor: pointer; 
+}
+
+/* 챗봇 스크롤바 숨기기 */
+.chat-body {
+  background: #f9f9f9; 
+  flex: 1; 
+  padding: .5rem; 
+  overflow-y: auto;
+  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none; /* IE 10+ */
+}
+
 .chat-body::-webkit-scrollbar {
   width: 0;
   height: 0;
-}
-.chat-body::-webkit-scrollbar-track {
-  display: none;
-}
-.chat-body::-webkit-scrollbar-thumb {
   display: none;
 }
 
-.chat-input { display:flex; border-top:0.0625rem solid lab(69.67% -15.03 -23.49); /* 1px → 0.0625rem 메세지칸 테투리실선*/ }
-#chatInput { color: #6363c2;/* 컬러 */font-size:.9rem; flex:1; border:none; padding:.5rem;  }
-/* 메세지를 입력하세요... */
+.chat-input { 
+  display: flex; 
+  border-top: 0.0625rem solid lab(69.67% -15.03 -23.49); 
+}
+
+#chatInput { 
+  color: #6363c2;
+  font-size: .9rem; 
+  flex: 1; 
+  border: none; 
+  padding: .5rem;  
+}
+
 #chatInput::placeholder { 
-  color: lab(69.67% -15.03 -23.49); }
-#chatInput:focus { outline:none; }
-#chatSendBtn { padding:0 .75rem; border:none; background:lab(69.67% -15.03 -23.49); color:#fff; cursor:pointer; }
-#chatSendBtn:hover { background:lab(69.67% -15.03 -23.49); }
+  color: lab(69.67% -15.03 -23.49); 
+}
 
+#chatInput:focus { 
+  outline: none; 
+}
 
+#chatSendBtn { 
+  padding: 0 .75rem; 
+  border: none; 
+  background: lab(69.67% -15.03 -23.49); 
+  color: #fff; 
+  cursor: pointer; 
+}
+
+#chatSendBtn:hover { 
+  background: lab(69.67% -15.03 -23.49); 
+}
+
+/* 임시 오버레이 */
+#temp-overlay {
+  position: fixed;
+  top: 0; 
+  left: 0;
+  width: 100vw; 
+  height: 100vh;
+  background: rgba(0,0,0,0.85);
+  color: #fff;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-size: 1.8rem;
+  text-align: center;
+  padding: 2rem;
+  z-index: 9999;
+  visibility: hidden;
+  opacity: 0;
+  transition: opacity .3s ease;
+}
+
+#temp-overlay.show {
+  visibility: visible;
+  opacity: 1;
+}
+
+/* 브라우저 메인 스크롤바 숨기기 시도 */
+/* 방법 1: 완전 숨기기 (가장 확실) */
+html {
+  overflow: hidden; /* 브라우저 스크롤바 완전 숨김 */
+  height: 100vh;
+}
+
+body {
+  overflow: hidden; /* body 스크롤바도 숨김 */
+  height: 100vh;
+}
+
+/* sections-wrapper가 스크롤 담당 */
+.sections-wrapper {
+  height: 100vh;
+  overflow-y: auto; /* 여기서만 스크롤 허용 */
+  overflow-x: hidden;
+  scroll-snap-type: y mandatory;
+  scroll-behavior: smooth;
+  /* 이 요소의 스크롤바 숨기기 */
+  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none; /* IE */
+}
+
+.sections-wrapper::-webkit-scrollbar {
+  display: none; /* Chrome, Safari, Edge */
+}
+
+/* 방법 2: 대안으로 최소한으로 만들기 (위 방법이 안 될 경우 주석 해제) */
+/*
+html, body {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+html::-webkit-scrollbar,
+body::-webkit-scrollbar {
+  width: 0px;
+  background: transparent;
+  display: none;
+}
+
+html::-webkit-scrollbar-thumb,
+body::-webkit-scrollbar-thumb {
+  background: transparent;
+}
+*/
 
 /* Responsive */
-@media(max-width:768px) {
-  #site-header .nav-link { margin-left:1rem; font-size:.9rem; }
-  .arrow { padding:.3rem; }
+@media(max-width: 768px) {
+  #site-header .nav-link { 
+    margin-left: 1rem; 
+    font-size: .9rem; 
+  }
+  
+  .arrow { 
+    padding: .3rem; 
+  }
+  
+  .slide-title-main {
+    font-size: 2.5rem;
+  }
+  
+  .sub-title-main {
+    font-size: 2rem;
+  }
+  
+  .sub-title-sub {
+    font-size: 1.5rem;
+  }
+  
+  /* 모바일에서 스크롤바 더 얇게 */
+  ::-webkit-scrollbar {
+    width: 6px;
+  }
 }
-
-
-/*추후 위부터 테스트해보기 chat빼고 다른곳 다 overflow있는애들위주로 그럼 스크롤하나되긋지*/
-/* 챗봇 메시지 영역(.chat-body)만 스크롤바 숨기기 */
-/* .chat-body {
-  overflow-y: auto;           /* 내부 스크롤은 가능 */
-  /* scrollbar-width: none;      Firefox 전용 */
-  /* -ms-overflow-style: none;   IE 10+ 전용 */
-/* }
-
-.chat-body::-webkit-scrollbar {  /* Chrome, Safari 등 WebKit 전용 */
-  /* width: 0;
-  height: 0; */
-/*}  */
