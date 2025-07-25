@@ -10,14 +10,19 @@ window.addEventListener('DOMContentLoaded', () => {
         .addEventListener('click', () => {location.href = '../html/index.html';
    });
    // delay scroll logic until after header is injected
+      const wrapper = document.querySelector('.sections-wrapper');
       const header = document.getElementById('site-header');
       const hero   = document.getElementById('hero-slider');
-      window.addEventListener('scroll', () => {
-        if (window.scrollY > hero.offsetHeight) header.classList.add('hidden');
-        else header.classList.remove('hidden');
-      });
-    })
-    .catch(console.error);
+      if (wrapper && header && hero) {
+       wrapper.addEventListener('scroll', () => {
+      // wrapper.scrollTop 이 hero 높이보다 크면 숨기기
+        if (wrapper.scrollTop > hero.offsetHeight) {
+          header.classList.add('hidden');
+      } else {
+        header.classList.remove('hidden');
+      }
+    });
+  }
 
   fetch('./footer.html')
   .then(r => r.text())

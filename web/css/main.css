@@ -28,7 +28,6 @@ html, body {
   scroll-snap-type: y mandatory;
   scroll-behavior: smooth;
 }
-
 body { 
   font-family: sans-serif; 
   min-height: 100vh; /* 최소 높이 보장 */
@@ -38,6 +37,69 @@ a {
   text-decoration: none; 
   color: inherit; 
 }
+/* 임시 오버레이 */
+#temp-overlay {
+  position: fixed;
+  top: 0; 
+  left: 0;
+  width: 100vw; 
+  height: 100vh;
+  background: rgba(0,0,0,0.85);
+  color: #fff;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-size: 1.8rem;
+  text-align: center;
+  padding: 2rem;
+  z-index: 9999;
+  visibility: hidden;
+  opacity: 0;
+  transition: opacity .3s ease;
+}
+
+#temp-overlay.show {
+  visibility: visible;
+  opacity: 1;
+}
+
+/* sections-wrapper가 스크롤 담당 */
+.sections-wrapper {
+  height: 100vh;
+  overflow-y: auto; /* 여기서만 스크롤 허용 */
+  overflow-x: hidden;
+  scroll-snap-type: y mandatory;
+  scroll-behavior: smooth;
+  /* 이 요소의 스크롤바 숨기기 */
+  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none; /* IE */
+}
+
+.sections-wrapper::-webkit-scrollbar {
+  display: none; /* Chrome, Safari, Edge */
+}
+
+/* 방법 2: 대안으로 최소한으로 만들기 (위 방법이 안 될 경우 주석 해제) */
+/*
+html, body {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+html::-webkit-scrollbar,
+body::-webkit-scrollbar {
+  width: 0px;
+  background: transparent;
+  display: none;
+}
+
+html::-webkit-scrollbar-thumb,
+body::-webkit-scrollbar-thumb {
+  background: transparent;
+}
+*/
+
+
 
 /* Header */
 #site-header { 
@@ -63,10 +125,19 @@ a {
   cursor: pointer; 
   display: flex; 
   align-items: center; 
+  text-shadow: 
+    0 0.1rem 0.2rem rgba(0,0,0,0.5),     /* 진한 외곽 그림자 */
+    0 0.05rem 0.1rem rgba(0,0,0,0.3);     /* 은은한 내부 그림자 */
+  transition: color .2s ease, 
+              transform .2s ease;
 }
 
 #site-header .logo img { 
   height: 2.5rem;
+  width: auto;
+    /* 부드러운 변환을 위해 트랜지션 추가 */
+  transition: transform 0.3s ease, filter 0.3s ease;
+
 }
 
 #site-header .logo span { 
@@ -82,14 +153,28 @@ a {
 
 #site-header .nav-link { 
   margin-left: 2rem; 
+  font-size: 1.25rem;
+  font-weight: bold;
   color: #fff; 
-  text-decoration: none; 
-  transition: color .2s; 
+  text-shadow: 
+    0 0.1rem 0.2rem rgba(0,0,0,0.7),     /* 진한 외곽 그림자 */
+    0 0.05rem 0.1rem rgba(0,0,0,0.5);     /* 은은한 내부 그림자 */
+  transition: color .2s ease, 
+              transform .2s ease;
 }
-
+/* hover 시 좀 더 강조 & 약간 확대 */
 #site-header .nav-link:hover { 
   color: lab(69.67% -15.03 -23.49); 
-  text-decoration: none; 
+  transform: scale(1.1);       /* 살짝 커짐 */
+  text-shadow:
+    0 0.2rem 0.4rem rgba(0,0,0,0.8),
+    0 0.1rem 0.2rem rgba(0,0,0,0.6);
+  font-weight: bold;
+}
+/* logo 호버 시 스케일 업 + 약간 밝게 */
+#site-header .logo:hover img {
+  transform: scale(1.1) translateY(-0.2rem);
+  filter: brightness(1.1);
 }
 
 /* Section 공통 부모요소 */
@@ -102,14 +187,14 @@ a {
 }
 
 /* sections-wrapper 수정 */
-.sections-wrapper {
+/* .sections-wrapper {
   width: 100vw;
   height: 100vh;
   overflow-x: hidden; /* 가로 스크롤 완전 차단 */
-  overflow-y: auto; /* 세로 스크롤만 허용 */
-  scroll-snap-type: y mandatory;
+  /* overflow-y: auto; /* 세로 스크롤만 허용 */
+  /* scroll-snap-type: y mandatory;
   scroll-behavior: smooth;
-}
+} */ 
 
 .section.slider {
   height: 100vh;
@@ -199,6 +284,7 @@ a {
 }
 
 .slider-overlay:hover .slide-title-main {
+  font-weight: bold;
   text-shadow:
     0 0.2rem 0.4rem rgba(0,0,0,0.8),
     0 0.05rem 0.1rem rgba(0,0,0,0.6);
@@ -214,6 +300,7 @@ a {
           drop-shadow(0 0.1rem 0.2rem rgba(0,0,0,0.6));
 }
 
+
 /* Arrow 버튼 */
 .arrow {
   position: absolute; 
@@ -226,38 +313,36 @@ a {
   z-index: 4;
   border: .2rem solid #add8e6;
 }
+.arrow.left  { left: 1rem;}
+.arrow.right { right: 1rem;}
 
-.arrow.left  { 
-  left: 1rem;  
-}
 
-.arrow.right { 
-  right: 1rem; 
-}
 
 /* THREE-COLUMN - 중요한 수정 */
 .subgrid { 
   display: flex; 
-  width: 100vw; /* 100% -> 100vw */
-  height: 100vh; 
+  width: 100vw; /* 100% -> 100vw 브라우저 너비꽉*/
+  height: 100vh; /* 1페이지만큼*/
   overflow: hidden; /* 내부 스크롤 방지 */
+  margin: 0;
+  padding: 0;
+  gap: 0;          /* flex-gap 제거 */
 }
-
+/* 공통 카드 스타일 + 변수로 들어올 bg */
 .sub { 
-  flex: 1; 
+  flex: 1 1 0; /* 균등 분할 */
   position: relative; 
   cursor: pointer;  
   overflow: hidden;
-  height: 100vh; /* 높이 명시 */
 }
 
 /* 이미지 수정 */
 .sub-img {
+  display: block; /* inline 요소 여백 제거 */
   width: 100%;
   height: 100vh; /* 100% -> 100vh */
   object-fit: cover;
   object-position: center;
-  display: block; /* inline 요소 여백 제거 */
   transition: filter .4s ease, transform .4s ease;
 }
 
@@ -289,16 +374,23 @@ a {
 }
 
 .sub-title-main {
+  display: block;
   font-size: 3rem;
+  font-weight: bold;
+  color: #fff;
+  text-shadow: 0 0 .5rem rgba(0,0,0,0.7);
+  margin-bottom: .5rem;
+}
+.sub-title-sub {
+  display: block;
+  font-size: 2rem;
+  color: #fff;
+  opacity: .9;
+  text-shadow: 0 0 .3rem rgba(0,0,0,0.7);
   font-weight: bold;
 }
 
-.sub-title-sub {
-  font-size: 2rem;
-  opacity: .8;
-}
-
-/* Hover 효과 */
+/* Hover 효과 이미지 어둡게 + 확대 */
 .sub:hover .sub-img { 
   filter: brightness(50%) blur(.2rem);
   transform: scale(1.02);
@@ -307,6 +399,7 @@ a {
 .sub:hover .sub-overlay {
   transform: translateX(-50%) translateY(-1rem);
   color: #fff;
+  font-weight: bold;
 }
 
 .sub:active .sub-title {
@@ -316,18 +409,22 @@ a {
 /* sub1 배경 반전 */
 .sub1::before { 
   transform: scaleX(-1);
+  font-weight: bold;
 }
 
 .sub1:hover::before {
   filter: brightness(50%) blur(2px);
   transform: scaleX(-1) scale(1.02);
+  font-weight: bold;
 }
 
 .sub2 .sub-title {
   bottom: 3rem !important;
   top: auto !important;
   color: #fff !important;
+  font-weight: bold;
 }
+
 
 /* FOOTER */
 #site-footer {
@@ -338,6 +435,7 @@ a {
   text-align: center; 
   scroll-snap-align: start;
 }
+
 
 /* CHATBOT */
 .chatbot { 
@@ -448,79 +546,8 @@ a {
   background: lab(69.67% -15.03 -23.49); 
 }
 
-/* 임시 오버레이 */
-#temp-overlay {
-  position: fixed;
-  top: 0; 
-  left: 0;
-  width: 100vw; 
-  height: 100vh;
-  background: rgba(0,0,0,0.85);
-  color: #fff;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  font-size: 1.8rem;
-  text-align: center;
-  padding: 2rem;
-  z-index: 9999;
-  visibility: hidden;
-  opacity: 0;
-  transition: opacity .3s ease;
-}
 
-#temp-overlay.show {
-  visibility: visible;
-  opacity: 1;
-}
 
-/* 브라우저 메인 스크롤바 숨기기 시도 */
-/* 방법 1: 완전 숨기기 (가장 확실) */
-html {
-  overflow: hidden; /* 브라우저 스크롤바 완전 숨김 */
-  height: 100vh;
-}
-
-body {
-  overflow: hidden; /* body 스크롤바도 숨김 */
-  height: 100vh;
-}
-
-/* sections-wrapper가 스크롤 담당 */
-.sections-wrapper {
-  height: 100vh;
-  overflow-y: auto; /* 여기서만 스크롤 허용 */
-  overflow-x: hidden;
-  scroll-snap-type: y mandatory;
-  scroll-behavior: smooth;
-  /* 이 요소의 스크롤바 숨기기 */
-  scrollbar-width: none; /* Firefox */
-  -ms-overflow-style: none; /* IE */
-}
-
-.sections-wrapper::-webkit-scrollbar {
-  display: none; /* Chrome, Safari, Edge */
-}
-
-/* 방법 2: 대안으로 최소한으로 만들기 (위 방법이 안 될 경우 주석 해제) */
-/*
-html, body {
-  scrollbar-width: none;
-  -ms-overflow-style: none;
-}
-
-html::-webkit-scrollbar,
-body::-webkit-scrollbar {
-  width: 0px;
-  background: transparent;
-  display: none;
-}
-
-html::-webkit-scrollbar-thumb,
-body::-webkit-scrollbar-thumb {
-  background: transparent;
-}
-*/
 
 /* Responsive */
 @media(max-width: 768px) {

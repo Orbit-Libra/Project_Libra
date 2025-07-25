@@ -8,19 +8,20 @@
   <link rel="stylesheet" href="../css/main.css" />
 </head>
 <body>
+  <!-- ① 스크롤 컨테이너 (한 번만) -->
   <div class="sections-wrapper">
   <!-- 공통 헤더 -->
   <div id="header-area"></div>
+  <!-- ↓ 스크롤 스냅 전체를 감싸는 래퍼 -->
+  <div class="sections-wrapper">
   <!-- 2) Hero Slider (오버랩 + 페이드) -->
-  <section class="section slider" id="hero-slider">
+    <section class="section slider" id="hero-slider">
     <!-- Slide 1 -->
-    <div class="slide active">
-      <img src="../images/university-of-georgia-students-near-library-wntg4iqud3lb6enk.jpg" alt="Slide 1">
-      <div class="slider-overlay">
+      <div class="slide">
+        <img src="../images/university-of-georgia-students-near-library-wntg4iqud3lb6enk.jpg" alt="Slide 1">
+        <div class="slider-overlay">
         <!-- ① 로고 추가 -->
-        <img src="../images/logo.jpeg" 
-        alt="Libra Logo" 
-           class="overlay-logo" />
+        <img src="../images/logo.jpeg" alt="Libra Logo" class="overlay-logo" />
          <div class="slide-title-main"></div><br/>
          <div class="sub-title-sub">교육 인프라 분석 및 예측 서비스 </div>
         </div>
@@ -91,7 +92,7 @@
       <img src="../images/chatbot.png" alt="Chatbot" id="chatbot-img">
     </div>
   </div>
-
+</div>
   <!-- Chatbot Window -->
   <div class="chat-window" id="chatWindow">
     <div class="chat-header">
