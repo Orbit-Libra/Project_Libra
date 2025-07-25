@@ -17,7 +17,7 @@ let showAverage = true; // 평균값 그래프 표시 여부
 const CHART_COLORS = {
     primary: '#42a5f5',
     secondary: '#29b6f6',
-    positive: '#4caf50',
+    positive: '#0068e8',
     negative: '#f44336',
     neutral: '#9e9e9e'
 };

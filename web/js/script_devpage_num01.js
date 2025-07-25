@@ -146,6 +146,33 @@ function initializeSelectors() {
     });
 }
 
+// 차트 타입 변경 이벤트
+function onChartTypeChange() {
+    const chartType = document.querySelector('input[name="chartType"]:checked').value;
+    console.log('차트 타입 변경:', chartType);
+    
+    updateCurrentInfo();
+    updateMainChartTitle();
+    
+    if (isReadyToChart()) {
+        generateChart();
+    }
+}
+
+// 메인 차트 제목 업데이트
+function updateMainChartTitle() {
+    const chartType = document.querySelector('input[name="chartType"]:checked').value;
+    const titleElement = document.getElementById('mainChartTitle');
+    
+    if (chartType === 'bar') {
+        titleElement.textContent = '데이터 분포 (막대그래프)';
+    } else if (chartType === 'line') {
+        titleElement.textContent = '함수형 그래프 (곡선)';
+    } else if (chartType === 'scatter') {
+        titleElement.textContent = '산점도 그래프 (추세선 포함)';
+    }
+}
+
 // 연도 변경 이벤트
 function onYearChange() {
     const selectedYear = document.getElementById('yearSelect').value;
@@ -367,6 +394,7 @@ function calculateYAxisData(data) {
         return {
             x: row[document.getElementById('xAxisSelect').value],
             y: yValue,
+            year: row.YR,
             originalRow: row
         };
     });
@@ -423,8 +451,15 @@ async function generateChart() {
         // 상관계수 계산
         const correlation = calculateCorrelation(processedData);
         
-        // 메인 차트 생성 (막대그래프)
-        createMainChart(processedData);
+        // 차트 타입에 따라 메인 차트 생성
+        const chartType = document.querySelector('input[name="chartType"]:checked').value;
+        if (chartType === 'bar') {
+            createBarChart(processedData);
+        } else if (chartType === 'line') {
+            createLineChart(processedData);
+        } else if (chartType === 'scatter') {
+            createScatterChart(processedData);
+        }
         
         // 사이드 차트 생성 (상관계수)
         createSideChart(correlation);
@@ -445,49 +480,93 @@ async function generateChart() {
     }
 }
 
-// 메인 차트 생성 (막대그래프)
-function createMainChart(data) {
+// 막대 차트 생성
+function createBarChart(data) {
     const ctx = document.getElementById('mainChart').getContext('2d');
     
     if (mainChart) {
         mainChart.destroy();
     }
     
-    // 데이터를 X축 값별로 그룹화하여 평균 계산
-    const groupedData = {};
-    data.forEach(item => {
-        const xKey = item.x.toString();
-        if (!groupedData[xKey]) {
-            groupedData[xKey] = [];
-        }
-        groupedData[xKey].push(item.y);
-    });
+    const xAxis = document.getElementById('xAxisSelect').value;
+    const yAxis = document.getElementById('yAxisSelect').value;
+    const yearFilterEnabled = document.getElementById('yearFilterCheckbox').checked;
     
-    const chartData = Object.keys(groupedData).map(key => ({
-        x: key,
-        y: groupedData[key].reduce((a, b) => a + b, 0) / groupedData[key].length
-    }));
+    let chartData;
     
-    // X축 값 기준으로 오름차순 정렬
-    chartData.sort((a, b) => {
-        // 숫자인지 확인하여 적절히 정렬
-        const aNum = parseFloat(a.x);
-        const bNum = parseFloat(b.x);
+    if (yearFilterEnabled) {
+        // 연도별 필터링 적용 - 연도별로 그룹화 후 X축 값별로 정렬
+        const groupedByYear = {};
+        data.forEach(item => {
+            const year = item.year || '미지정';
+            if (!groupedByYear[year]) {
+                groupedByYear[year] = {};
+            }
+            const xKey = item.x.toString();
+            if (!groupedByYear[year][xKey]) {
+                groupedByYear[year][xKey] = [];
+            }
+            groupedByYear[year][xKey].push(item.y);
+        });
         
-        if (!isNaN(aNum) && !isNaN(bNum)) {
-            return aNum - bNum; // 숫자면 숫자 정렬
-        } else {
-            return a.x.localeCompare(b.x); // 문자면 문자 정렬
-        }
-    });
+        // 연도별로 평균 계산하여 데이터 생성
+        chartData = [];
+        Object.keys(groupedByYear).sort().forEach(year => {
+            Object.keys(groupedByYear[year]).sort((a, b) => {
+                const aNum = parseFloat(a);
+                const bNum = parseFloat(b);
+                if (!isNaN(aNum) && !isNaN(bNum)) {
+                    return aNum - bNum;
+                } else {
+                    return a.localeCompare(b);
+                }
+            }).forEach(xKey => {
+                const values = groupedByYear[year][xKey];
+                const avgValue = values.reduce((a, b) => a + b, 0) / values.length;
+                chartData.push({
+                    x: `${year}-${xKey}`,
+                    y: avgValue,
+                    label: `${year}년 ${xKey}`
+                });
+            });
+        });
+    } else {
+        // 기존 방식 - X축 값별로 그룹화하여 평균 계산
+        const groupedData = {};
+        data.forEach(item => {
+            const xKey = item.x.toString();
+            if (!groupedData[xKey]) {
+                groupedData[xKey] = [];
+            }
+            groupedData[xKey].push(item.y);
+        });
+        
+        chartData = Object.keys(groupedData).map(key => ({
+            x: key,
+            y: groupedData[key].reduce((a, b) => a + b, 0) / groupedData[key].length,
+            label: key
+        }));
+        
+        // X축 값 기준으로 오름차순 정렬
+        chartData.sort((a, b) => {
+            const aNum = parseFloat(a.x);
+            const bNum = parseFloat(b.x);
+            
+            if (!isNaN(aNum) && !isNaN(bNum)) {
+                return aNum - bNum;
+            } else {
+                return a.x.localeCompare(b.x);
+            }
+        });
+    }
     
-    // 너무 많은 데이터는 가독성을 위해 제한 (상위 50개)
-    const displayData = chartData.slice(0, 50);
+    // 막대 너비 계산 (데이터 수에 따라 조정) - 모든 데이터 표시
+    const displayData = chartData; // 모든 데이터 표시
     
     const config = {
         type: 'bar',
         data: {
-            labels: displayData.map(item => item.x),
+            labels: displayData.map(item => item.label || item.x),
             datasets: [{
                 label: 'Y축 값',
                 data: displayData.map(item => item.y),
@@ -502,7 +581,7 @@ function createMainChart(data) {
             plugins: {
                 title: {
                     display: true,
-                    text: `${document.getElementById('xAxisSelect').value} vs ${document.getElementById('yAxisSelect').value}`,
+                    text: `${xAxis} vs ${yAxis}`,
                     font: {
                         size: 12
                     }
@@ -515,20 +594,20 @@ function createMainChart(data) {
                 x: {
                     title: {
                         display: true,
-                        text: document.getElementById('xAxisSelect').value
+                        text: xAxis + (yearFilterEnabled ? ' (연도별)' : '')
                     },
                     ticks: {
                         maxRotation: 45,
                         minRotation: 0,
                         font: {
-                            size: 10
+                            size: Math.max(8, Math.min(12, 400 / displayData.length))
                         }
                     }
                 },
                 y: {
                     title: {
                         display: true,
-                        text: document.getElementById('yAxisSelect').value + ' (처리된 값)'
+                        text: yAxis + ' (처리된 값)'
                     },
                     ticks: {
                         font: {
@@ -539,10 +618,358 @@ function createMainChart(data) {
             },
             elements: {
                 bar: {
-                    // 막대의 위치를 X축 데이터 값에 맞춰 조정
-                    categoryPercentage: 0.8,
-                    barPercentage: 0.9
+                    categoryPercentage: Math.max(0.1, Math.min(0.9, 30 / displayData.length)),
+                    barPercentage: 0.8
                 }
+            }
+        }
+    };
+    
+    mainChart = new Chart(ctx, config);
+}
+
+// 산점도 차트 생성 (추세선 포함)
+function createScatterChart(data) {
+    const ctx = document.getElementById('mainChart').getContext('2d');
+    
+    if (mainChart) {
+        mainChart.destroy();
+    }
+    
+    const xAxis = document.getElementById('xAxisSelect').value;
+    const yAxis = document.getElementById('yAxisSelect').value;
+    const yearFilterEnabled = document.getElementById('yearFilterCheckbox').checked;
+    
+    let datasets = [];
+    
+    if (yearFilterEnabled) {
+        // 연도별로 분리하여 다른 색상으로 표시
+        const groupedByYear = {};
+        data.forEach(item => {
+            const year = item.year || '미지정';
+            if (!groupedByYear[year]) {
+                groupedByYear[year] = [];
+            }
+            groupedByYear[year].push({
+                x: parseFloat(item.x) || 0,
+                y: item.y
+            });
+        });
+        
+        // 연도별로 데이터셋 생성
+        const colors = [
+            'rgba(66, 165, 245, 0.8)',
+            'rgba(244, 67, 54, 0.8)',
+            'rgba(76, 175, 80, 0.8)',
+            'rgba(255, 193, 7, 0.8)',
+            'rgba(156, 39, 176, 0.8)',
+            'rgba(255, 87, 34, 0.8)'
+        ];
+        
+        Object.keys(groupedByYear).sort().forEach((year, index) => {
+            const yearData = groupedByYear[year];
+            const color = colors[index % colors.length];
+            
+            // 산점도 데이터셋
+            datasets.push({
+                label: `${year}년`,
+                data: yearData,
+                backgroundColor: color,
+                borderColor: color.replace('0.8)', '1)'),
+                pointRadius: 4,
+                pointHoverRadius: 6,
+                showLine: false,
+                type: 'scatter'
+            });
+            
+            // 각 연도별 추세선 계산 및 추가
+            if (yearData.length > 1) {
+                const trendData = calculateTrendLine(yearData);
+                datasets.push({
+                    label: `${year}년 추세선`,
+                    data: trendData,
+                    borderColor: color.replace('0.8)', '0.4)'),
+                    backgroundColor: 'transparent',
+                    fill: false,
+                    tension: 0,
+                    pointRadius: 0,
+                    pointHoverRadius: 0,
+                    showLine: true,
+                    type: 'line'
+                });
+            }
+        });
+    } else {
+        // 전체 데이터를 하나의 산점도로 표시
+        const scatterData = data.map(item => ({
+            x: parseFloat(item.x) || 0,
+            y: item.y
+        }));
+        
+        // 산점도 데이터셋
+        datasets.push({
+            label: '데이터 포인트',
+            data: scatterData,
+            backgroundColor: 'rgba(66, 165, 245, 0.8)',
+            borderColor: 'rgba(66, 165, 245, 1)',
+            pointRadius: 4,
+            pointHoverRadius: 6,
+            showLine: false,
+            type: 'scatter'
+        });
+        
+        // 전체 추세선 계산 및 추가
+        if (scatterData.length > 1) {
+            const trendData = calculateTrendLine(scatterData);
+            datasets.push({
+                label: '추세선',
+                data: trendData,
+                borderColor: 'rgba(66, 165, 245, 0.4)',
+                backgroundColor: 'transparent',
+                fill: false,
+                tension: 0,
+                pointRadius: 0,
+                pointHoverRadius: 0,
+                showLine: true,
+                type: 'line'
+            });
+        }
+    }
+    
+    // X축과 Y축 범위 계산
+    const allXValues = data.map(item => parseFloat(item.x) || 0);
+    const allYValues = data.map(item => item.y);
+    
+    const xMin = Math.min(...allXValues);
+    const xMax = Math.max(...allXValues);
+    const yMin = Math.min(...allYValues);
+    const yMax = Math.max(...allYValues);
+    
+    const xPadding = (xMax - xMin) * 0.05;
+    const yPadding = (yMax - yMin) * 0.1;
+    
+    const config = {
+        type: 'scatter',
+        data: {
+            datasets: datasets
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                title: {
+                    display: true,
+                    text: `${xAxis} vs ${yAxis} (산점도)`,
+                    font: {
+                        size: 12
+                    }
+                },
+                legend: {
+                    display: yearFilterEnabled && datasets.length > 2
+                }
+            },
+            scales: {
+                x: {
+                    type: 'linear',
+                    position: 'bottom',
+                    title: {
+                        display: true,
+                        text: xAxis
+                    },
+                    min: xMin - xPadding,
+                    max: xMax + xPadding,
+                    ticks: {
+                        font: {
+                            size: 10
+                        }
+                    }
+                },
+                y: {
+                    title: {
+                        display: true,
+                        text: yAxis + ' (처리된 값)'
+                    },
+                    min: yMin - yPadding,
+                    max: yMax + yPadding,
+                    ticks: {
+                        font: {
+                            size: 10
+                        }
+                    }
+                }
+            },
+            interaction: {
+                intersect: false,
+                mode: 'point'
+            }
+        }
+    };
+    
+    mainChart = new Chart(ctx, config);
+}
+
+// 추세선 계산 함수 (최소제곱법)
+function calculateTrendLine(data) {
+    if (data.length < 2) return [];
+    
+    const n = data.length;
+    const sumX = data.reduce((sum, point) => sum + point.x, 0);
+    const sumY = data.reduce((sum, point) => sum + point.y, 0);
+    const sumXY = data.reduce((sum, point) => sum + point.x * point.y, 0);
+    const sumX2 = data.reduce((sum, point) => sum + point.x * point.x, 0);
+    
+    // 기울기와 y절편 계산
+    const slope = (n * sumXY - sumX * sumY) / (n * sumX2 - sumX * sumX);
+    const intercept = (sumY - slope * sumX) / n;
+    
+    // X값 범위에서 추세선 포인트 생성
+    const xValues = data.map(point => point.x).sort((a, b) => a - b);
+    const minX = xValues[0];
+    const maxX = xValues[xValues.length - 1];
+    
+    return [
+        { x: minX, y: slope * minX + intercept },
+        { x: maxX, y: slope * maxX + intercept }
+    ];
+}
+
+// 선형 차트 생성 (함수형 그래프)
+function createLineChart(data) {
+    const ctx = document.getElementById('mainChart').getContext('2d');
+    
+    if (mainChart) {
+        mainChart.destroy();
+    }
+    
+    const xAxis = document.getElementById('xAxisSelect').value;
+    const yAxis = document.getElementById('yAxisSelect').value;
+    const yearFilterEnabled = document.getElementById('yearFilterCheckbox').checked;
+    
+    let datasets = [];
+    
+    if (yearFilterEnabled) {
+        // 연도별로 분리하여 여러 선으로 표시
+        const groupedByYear = {};
+        data.forEach(item => {
+            const year = item.year || '미지정';
+            if (!groupedByYear[year]) {
+                groupedByYear[year] = [];
+            }
+            groupedByYear[year].push({
+                x: parseFloat(item.x) || 0,
+                y: item.y
+            });
+        });
+        
+        // 연도별로 데이터 정렬하고 데이터셋 생성
+        const colors = [
+            'rgba(66, 165, 245, 1)',
+            'rgba(244, 67, 54, 1)',
+            'rgba(76, 175, 80, 1)',
+            'rgba(255, 193, 7, 1)',
+            'rgba(156, 39, 176, 1)',
+            'rgba(255, 87, 34, 1)'
+        ];
+        
+        Object.keys(groupedByYear).sort().forEach((year, index) => {
+            const yearData = groupedByYear[year].sort((a, b) => a.x - b.x);
+            const color = colors[index % colors.length];
+            
+            datasets.push({
+                label: `${year}년`,
+                data: yearData,
+                borderColor: color,
+                backgroundColor: color.replace('1)', '0.2)'),
+                fill: false,
+                tension: 0.4,
+                pointRadius: 2,
+                pointHoverRadius: 4
+            });
+        });
+    } else {
+        // 전체 데이터를 하나의 선으로 표시
+        const sortedData = data.map(item => ({
+            x: parseFloat(item.x) || 0,
+            y: item.y
+        })).sort((a, b) => a.x - b.x);
+        
+        datasets.push({
+            label: 'Y축 값',
+            data: sortedData,
+            borderColor: 'rgba(66, 165, 245, 1)',
+            backgroundColor: 'rgba(66, 165, 245, 0.2)',
+            fill: false,
+            tension: 0.4,
+            pointRadius: 2,
+            pointHoverRadius: 4
+        });
+    }
+    
+    // X축과 Y축 범위 계산
+    const allXValues = data.map(item => parseFloat(item.x) || 0);
+    const allYValues = data.map(item => item.y);
+    
+    const xMin = Math.min(...allXValues);
+    const xMax = Math.max(...allXValues);
+    const yMin = Math.min(...allYValues);
+    const yMax = Math.max(...allYValues);
+    
+    const xPadding = (xMax - xMin) * 0.05;
+    const yPadding = (yMax - yMin) * 0.1;
+    
+    const config = {
+        type: 'line',
+        data: {
+            datasets: datasets
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                title: {
+                    display: true,
+                    text: `${xAxis} vs ${yAxis} (함수형)`,
+                    font: {
+                        size: 12
+                    }
+                },
+                legend: {
+                    display: yearFilterEnabled && datasets.length > 1
+                }
+            },
+            scales: {
+                x: {
+                    type: 'linear',
+                    position: 'bottom',
+                    title: {
+                        display: true,
+                        text: xAxis
+                    },
+                    min: xMin - xPadding,
+                    max: xMax + xPadding,
+                    ticks: {
+                        font: {
+                            size: 10
+                        }
+                    }
+                },
+                y: {
+                    title: {
+                        display: true,
+                        text: yAxis + ' (처리된 값)'
+                    },
+                    min: yMin - yPadding,
+                    max: yMax + yPadding,
+                    ticks: {
+                        font: {
+                            size: 10
+                        }
+                    }
+                }
+            },
+            interaction: {
+                intersect: false,
+                mode: 'index'
             }
         }
     };
@@ -574,6 +1001,14 @@ function createSideChart(correlation) {
         options: {
             responsive: true,
             maintainAspectRatio: false,
+            layout: {
+                padding: {
+                    left: 10,
+                    right: 10,
+                    top: 10,
+                    bottom: 10
+                }
+            },
             plugins: {
                 title: {
                     display: true,
@@ -616,12 +1051,30 @@ function createSideChart(correlation) {
     };
     
     sideChart = new Chart(ctx, config);
+    
+    // 상관계수 퍼센트 표시
+    const correlationPercent = (correlation * 100).toFixed(2);
+    document.getElementById('correlationPercent').textContent = correlationPercent;
+    document.getElementById('correlationInfo').style.display = 'block';
 }
 
 // 현재 분석 정보 업데이트
 function updateCurrentInfo() {
     document.getElementById('currentYear').textContent = document.getElementById('yearSelect').value;
+    
+    const chartType = document.querySelector('input[name="chartType"]:checked').value;
+    let chartTypeText = '';
+    if (chartType === 'bar') {
+        chartTypeText = '막대형 그래프';
+    } else if (chartType === 'line') {
+        chartTypeText = '함수형 그래프';
+    } else if (chartType === 'scatter') {
+        chartTypeText = '산점도 그래프';
+    }
+    document.getElementById('currentChartType').textContent = chartTypeText;
+    
     document.getElementById('currentXAxis').textContent = document.getElementById('xAxisSelect').value || '-';
+    document.getElementById('currentYearFilter').textContent = document.getElementById('yearFilterCheckbox').checked ? '적용' : '미적용';
     document.getElementById('currentYAxis').textContent = document.getElementById('yAxisSelect').value || '-';
     document.getElementById('currentWeight').textContent = document.getElementById('weightInput').value;
     document.getElementById('currentLog').textContent = document.getElementById('logCheckbox').checked ? '적용' : '미적용';
@@ -670,6 +1123,9 @@ function showError(message) {
     
     mainPlaceholder.style.display = 'flex';
     sidePlaceholder.style.display = 'flex';
+    
+    // 상관계수 정보 숨기기
+    document.getElementById('correlationInfo').style.display = 'none';
     
     hideLoading();
 }
@@ -751,7 +1207,9 @@ function saveAnalysis() {
     
     const analysisConfig = {
         year: document.getElementById('yearSelect').value,
+        chartType: document.querySelector('input[name="chartType"]:checked').value,
         xAxis: xAxis,
+        yearFilter: document.getElementById('yearFilterCheckbox').checked,
         yAxis: yAxis,
         weight: document.getElementById('weightInput').value,
         applyLog: document.getElementById('logCheckbox').checked,
@@ -801,6 +1259,7 @@ function initializePage() {
     
     // 현재 정보 업데이트
     updateCurrentInfo();
+    updateMainChartTitle();
 }
 
 // 키보드 단축키
@@ -856,7 +1315,9 @@ function debugInfo() {
     
     console.log('현재 설정:', {
         year: document.getElementById('yearSelect').value,
+        chartType: document.querySelector('input[name="chartType"]:checked').value,
         xAxis: document.getElementById('xAxisSelect').value,
+        yearFilter: document.getElementById('yearFilterCheckbox').checked,
         yAxis: document.getElementById('yAxisSelect').value,
         weight: document.getElementById('weightInput').value,
         applyLog: document.getElementById('logCheckbox').checked,

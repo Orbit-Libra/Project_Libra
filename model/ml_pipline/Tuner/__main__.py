@@ -9,7 +9,7 @@ from tunercontroller_Num02 import TunerController_Num02
 from Tuner.extractor_Num01 import Num01Extractor
 
 def main():
-    config_name = os.getenv("MODEL_CONFIG_NAME", "Num02_Config_XGB.json")
+    config_name = os.getenv("MODEL_CONFIG_NAME", "Num01_Tuner_Log_20250724_124200.json")
     config_path = Path(__file__).resolve().parent.parent / "_Configs" / config_name
     log_dir = Path(__file__).resolve().parent.parent / "_Logs" / "Tuner_Logs"
     log_dir.mkdir(exist_ok=True, parents=True)
