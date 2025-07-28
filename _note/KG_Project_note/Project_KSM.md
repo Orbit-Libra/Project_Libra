@@ -354,17 +354,25 @@ D:\workspace\project\KG_AI_Project/db\LIBRA_DB.dbf
 
 ## 프로젝트 폴더 구성
 
+```
 
 Project_Libra/  
 │  
 ├── \_note <- 커밋로그, 개발노트, 할일 노트 폴더  
 ├── backup <- 개발중 생성된 코드 백업본 저장 폴더  
 ├── db <- 테이블스페이스 및 쿼리문 구성 폴더  
-├── java <- 웹 및 서버 관련 자바 프로젝트 폴더  
-├── python <- 머신러닝 파이썬 프로젝트 폴더  
+├── server <- 웹 및 서버 관련 프로젝트 폴더  
+├── model <- 머신러닝 관련 파이썬 프로젝트 폴더  
 ├── resource <- 데이터시트 및 각종 리소스파일 폴더  
 ├── tools <- 각종 툴 폴더  
-└── web <- 웹사이트 UI (HTML & CSS & JS) 관련 폴더  
+├── web <- 웹사이트 UI (HTML & CSS & JS) 관련 폴더  
+│  
+├── environment.yml       # 가상환경 세팅: conda env create -f environment.yml
+├── README.md             # 설명글
+└── requirements.txt      # 라이브러리 설치: pip install -r requirements.txt
+
+```
+
 
 
 
@@ -474,16 +482,30 @@ ml_pipeline/
 │
 ├── __init__.py
 ├── __main__.py           # 전체 실행
-├── environment.yml       # 가상환경 세팅: conda env create -f environment.yml
-├── README.md             # 설명글
-└── requirements.txt      # 라이브러리 설치: pip install -r requirements.txt
+└── README.md             # 설명글
+
+
+```
+
+## 프레임워크 구성
+
+```
+
+server/  
+│  
+├── prontend_app/
+│   ├──  app.py
+│   ├── 
+│   └──
 
 ```
 
 
-
-
 ## 웹UI 파일구성
+
+#### 초안코드들
+
+```
 
 web/  
 │  
@@ -508,6 +530,41 @@ web/
 │   └──
 │  
 
+```
+
+#### 플라스크 기반
+
+```
+
+web/  
+│  
+├── static/
+│   ├── css/
+│   │   ├── main.css
+│   │   ├── 
+│   │   ├── 
+│   │   └── 
+│
+│   ├── images/
+│   │   ├── 
+│   │   ├── 
+│   │   ├── 
+│   │   └── 
+│
+│   ├── js/
+│   │   ├── main.js
+│   │   ├── 
+│   │   ├── 
+│   │   └── 
+│  
+├── templates/
+│   ├── footer.html
+│   ├── header.html
+│   ├── index.html
+│   └── main.html
+
+
+```
 ## 웹페이지 구성
 
 #### 메인페이지
