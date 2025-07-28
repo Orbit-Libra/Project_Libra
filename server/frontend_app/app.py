@@ -10,7 +10,7 @@ app = Flask(
     template_folder=os.path.join(WEB_DIR, 'templates'),
     static_folder=os.path.join(WEB_DIR, 'static')
 )
-
+# fetch()로 불러오는 중이라면 @app.route('/header') 등으로 라우팅해줘야 함
 @app.route('/')
 def index():
     return render_template('index.html')
@@ -18,6 +18,18 @@ def index():
 @app.route('/main')
 def main():
     return render_template('main.html')
+
+@app.route('/header')
+def header():
+    return render_template('header.html')
+
+@app.route('/chartpage_num01')
+def header():
+    return render_template('chartpage_num01.html')
+
+@app.route('/footer')
+def footer():
+    return render_template('footer.html')
 
 if __name__ == '__main__':
     app.run(debug=True)

@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Libra - 환경점수예측 분석</title>
+
+  <!-- Font and Reset -->
+  <!-- Noto Sans KR 폰트 -->
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR&display=swap" rel="stylesheet">
+
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+  <style>
+    :root {
+      --color-bg-header: #0d1f2d;
+      --color-footer-bg: #0d1f2d;
+      --color-logo-text: lab(69.67% -15.03 -23.49);
+      --color-body-bg: #eaf5fa;
+      --color-nav-text: #ffffff;
+      --color-highlight: lab(69.67% -15.03 -23.49);
+      --color-text-shadow: #fff;
+       --transition-fast: 0.3s;
+      --font-sans: 'Noto Sans KR', sans-serif;
+    }
+
+    html {font-size: 16px;}
+    body {
+      margin: 0;
+      font-family: var(--font-sans);
+      background-color: var(--color-body-bg);
+      color: #fff;
+    }
+
+    /* Header */
+    header {
+      background-color: var(--color-bg-header);
+      padding: 1.5vh 2vw;
+    }
+
+    .header-content {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+    }
+
+    .logo {
+      font-size: 1.5rem;
+      font-weight: bold;
+      color: var(--color-logo-text);
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .logo img {
+      height: 4vh;
+      border-radius: 50%;
+    }
+
+    nav.nav-menu {
+      display: flex;
+      gap: 2vw;
+    }
+
+    .nav-item {
+      color: var(--color-nav-text);
+      text-decoration: none;
+      font-size: 1rem;
+    }
+
+    .nav-item:hover {
+      text-decoration: underline;
+    }
+
+    .login-btn {
+      background: transparent;
+      border: 1px solid #fff;
+      color: #fff;
+      padding: 0.5rem 1rem;
+      border-radius: 0.5rem;
+      cursor: pointer;
+      font-size: 0.9rem;
+    }
+
+    /* 레이아웃 */
+    .wrapper { display: flex; flex: 1; overflow: hidden; }
+    .sidebar {
+      width: 20vw;
+      min-width: 200px;
+      max-width: 300px;
+      background: #fff;
+      padding: 2rem;
+      box-shadow: 2px 0 5px rgba(0,0,0,0.1);
+      transition: width var(--transition-fast);
+      overflow-y: auto;
+    }
+    .sidebar.collapsed {
+      width: 0;
+      padding: 0;
+      overflow: hidden;
+    }
+    .toggle-sidebar {
+      position: absolute;
+      top: 3rem;
+      left: 20vw;
+      transform: translateX(-100%);
+      background: var(--highlight);
+      color: #fff;
+      border: none;
+      padding: 0.5rem;
+      cursor: pointer;
+      border-radius: 0.3rem;
+      transition: left var(--transition-fast);
+    }
+    .sidebar.collapsed + .toggle-sidebar { left: 0; }
+
+    .content {
+      flex: 1;
+      padding: 2rem;
+      overflow-y: auto;
+    }
+
+    .chart-area {
+      background: #fff;
+      padding: 2rem;
+      border-radius: 0.5rem;
+    }
+    canvas {
+      width: 100% !important;
+      height: 60vh !important;
+    }
+    /* 별도 hover 스타일 */
+    .form-group select:hover,
+    .form-group select:focus,
+    .form-group button:hover {
+      outline: none;
+      border-color: var(--highlight);
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Header -->
+  <header>
+    <div class="header-content">
+      <div class="logo" onclick="navigateTo('/')">
+        <img src="../static/images/logo.jpeg" alt="logo" onerror="this.style.display='none'">
+        Libra
+      </div>
+      <nav >
+        <a href="#" class="nav-item" onclick="navigateTo('learning')">환경점수예측 분석</a>
+        <a href="#" class="nav-item" onclick="navigateTo('development')">학습환경 예측</a>
+        <a href="#" class="nav-item" onclick="navigateTo('myservice')">마이 서비스</a>
+      </nav>
+      <button class="login-btn" onclick="navigateTo('mypage')">👤 My Page</button>
+    </div>
+  </header>
+
+  <!-- Main -->
+  <main>
+    <button class="toggle-btn" onclick="togglePhoto()"> 접기/펼치기</button>
+ 
+    </div>
+
+    <section class="chart-area">
+      <h2>대학 환경점수 차트</h2>
+      <canvas id="chart"></canvas>
+    </section>
+  </main>
+
+  <!-- Footer -->
+    <!-- 3) Footer -->
+    <div id="footer-area"></div>
+
+  <!-- JS -->
+  <script>
+    function navigateTo(page) {
+      alert(page + " 페이지 이동 (구현 예정)");
+    }
+
+    function togglePhoto() {
+      const photo = document.getElementById('photo-section');
+      photo.classList.toggle('closed');
+    }
+
+    // Chart.js 예시용 기본 차트
+    const ctx = document.getElementById('chart').getContext('2d');
+    new Chart(ctx, {
+      type: 'bar',
+      data: {
+        labels: ['서울대', '연세대', '고려대', '한양대', '성균관대'],
+        datasets: [{
+          label: '환경점수',
+          data: [89, 85, 82, 78, 75],
+          backgroundColor: 'rgba(66, 165, 245, 0.6)'
+        }]
+      },
+      options: {
+        responsive: true,
+        plugins: {
+          legend: {
+            position: 'top',
+          },
+          title: {
+            display: true,
+            text: '2025년 대학 환경 점수 예측'
+          }
+        }
+      }
+    });
+  </script>
+</body>
+</html>

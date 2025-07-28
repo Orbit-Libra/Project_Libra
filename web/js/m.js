@@ -1,14 +1,14 @@
 // js/main.js - 수정된 버전
 window.addEventListener('DOMContentLoaded', () => {
   // 1) 헤더·푸터 인클루드
-  fetch('./header.html')
+  fetch('./templates/header.html')
     .then(r => r.text())
     .then(html => {
       document.getElementById('header-area').innerHTML = html;
       
       // 어디서든지 로고 누르면 index인 첫페이지로 이동
       document.getElementById('logo-area')?.addEventListener('click', () => {
-        location.href = '../html/index.html';
+        location.href = './index.html';
       });
       
       // 헤더 로드 후 스크롤 로직 초기화 (수정된 부분)
@@ -16,7 +16,7 @@ window.addEventListener('DOMContentLoaded', () => {
     })
     .catch(console.error);
 
-  fetch('./footer.html')
+  fetch('./templates/footer.html')
     .then(r => r.text())
     .then(html => {
       document.getElementById('footer-area').innerHTML = html;
