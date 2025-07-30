@@ -20,7 +20,7 @@
   "TABLE_TYPE": "DB",
   "DB_TABLE_NAME": "LIBRA.FILTERED",
   "SCV_DATA_NAME": "\ud544\ud130\ub9c1\ub370\uc774\ud130",
-  "CSV_DIR": "D:/workspace/project/Project_libra/resource/csv_files",
+  "CSV_DIR": "D:/workspace/project/Project_libra/1st_Project_MachineLearning/resource/csv_files",
   "INPUT_COLUMNS": [
     "YR",
     "APS_APS",
@@ -123,7 +123,7 @@
         "TABLE_PREFIX": "Num06"
       },
       "CSV_CONFIG": {
-        "FILE_PATH": "D:/workspace/project/Project_libra/resource/csv_files/csv_data",
+        "FILE_PATH": "D:/workspace/project/Project_libra/1st_Project_MachineLearning/resource/csv_files/csv_data",
         "FILE_PREFIX": "Num06_\uc885\ud569\ub370\uc774\ud130"
       }
     },
@@ -147,7 +147,7 @@
         "TABLE_PREFIX": "ESTIMATIONFLOW"
       },
       "CSV_CONFIG": {
-        "FILE_PATH": "D:/workspace/project/Project_libra/resource/csv_files",
+        "FILE_PATH": "D:/workspace/project/Project_libra/1st_Project_MachineLearning/resource/csv_files",
         "FILE_PREFIX": "\uc608\uce21\ud658\uacbd\uc810\uc218"
       }
     }
