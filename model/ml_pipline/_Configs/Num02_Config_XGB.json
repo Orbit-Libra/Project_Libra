@@ -19,7 +19,7 @@
   "TABLE_TYPE": "CSV",
   "DB_TABLE_NAME": "LIBRA.ESTIMATIONFLOW",
   "SCV_DATA_NAME": "\uc608\uce21\ud658\uacbd\uc810\uc218",
-  "CSV_DIR": "D:/workspace/project/Project_libra/resource/csv_files",
+  "CSV_DIR": "D:/workspace/project/Project_libra/1st_Project_MachineLearning/resource/csv_files",
   "INPUT_COLUMNS": [
     "SCR_EST_2014",
     "SCR_EST_2015",
@@ -100,7 +100,7 @@
         "TABLE_PREFIX": "ESTIMATIONFLOW"
       },
       "CSV_CONFIG": {
-        "FILE_PATH": "D:/workspace/project/Project_libra/resource/csv_files",
+        "FILE_PATH": "D:/workspace/project/Project_libra/1st_Project_MachineLearning/resource/csv_files",
         "FILE_PREFIX": "\uc608\uce21\ud658\uacbd\uc810\uc218"
       }
     },
@@ -124,7 +124,7 @@
         "TABLE_PREFIX": "ESTIMATIONFUTURE"
       },
       "CSV_CONFIG": {
-        "FILE_PATH": "D:/workspace/project/Project_libra/resource/csv_files",
+        "FILE_PATH": "D:/workspace/project/Project_libra/1st_Project_MachineLearning/resource/csv_files",
         "FILE_PREFIX": "\uc608\uce21\ub370\uc774\ud130\ucd1d\ud569"
       }
     }

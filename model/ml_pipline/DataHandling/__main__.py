@@ -1,7 +1,7 @@
 # 경로 보정
 import os
 import sys
-sys.path.append("d:/workspace/project/Project_Libra/model/ml_pipline")
+sys.path.append("d:/workspace/project/Project_Libra/1st_Project_MachineLearning/model/ml_pipline")
 
 from ExcelToCSVConverter_ver1 import ExcelToCSVConverter_ver1
 from ExcelToCSVConverter_ver2 import ExcelToCSVConverter_ver2

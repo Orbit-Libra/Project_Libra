@@ -1,7 +1,7 @@
 // js/main.js - 수정된 버전
 window.addEventListener('DOMContentLoaded', () => {
   // 1) 헤더·푸터 인클루드
-  fetch('./templates/header.html')
+  fetch('./html/header.html')
     .then(r => r.text())
     .then(html => {
       document.getElementById('header-area').innerHTML = html;
@@ -16,7 +16,7 @@ window.addEventListener('DOMContentLoaded', () => {
     })
     .catch(console.error);
 
-  fetch('./templates/footer.html')
+  fetch('./html/footer.html')
     .then(r => r.text())
     .then(html => {
       document.getElementById('footer-area').innerHTML = html;

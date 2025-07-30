@@ -6,7 +6,7 @@ GRANT CONNECT, RESOURCE TO libra;
 
 -- 테이블스페이스 생성
 CREATE TABLESPACE LIBRA_DB
-DATAFILE 'D:\workspace\project\Project_Libra\db\LIBRA_DB.dbf'
+DATAFILE 'D:\workspace\project\Project_Libra\1st_Project_MachineLearning\db\LIBRA_DB.dbf'
 SIZE 100M
 AUTOEXTEND ON
 NEXT 50M MAXSIZE UNLIMITED;
