@@ -13,12 +13,12 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "KG_Project_note/Project_KSM.md",
+                "file": "KG_Project_note/Project_Guid.md",
                 "mode": "source",
                 "source": false
               },
               "icon": "lucide-file",
-              "title": "Project_KSM"
+              "title": "Project_Guid"
             }
           }
         ]
@@ -78,7 +78,8 @@
       }
     ],
     "direction": "horizontal",
-    "width": 300
+    "width": 300,
+    "collapsed": true
   },
   "right": {
     "id": "67b3b2a805b9ccb3",
@@ -157,6 +158,7 @@
   },
   "left-ribbon": {
     "hiddenItems": {
+      "bases:새 베이스 생성하기": false,
       "switcher:빠른 전환기 열기": false,
       "graph:그래프 뷰 열기": false,
       "canvas:새 캔버스 만들기": false,
@@ -167,6 +169,13 @@
   },
   "active": "d693e88e324285ad",
   "lastOpenFiles": [
+    "KG_Project_note/image_resource/Pasted image 20250820122011.png",
+    "KG_Project_note/image_resource/Pasted image 20250820121748.png",
+    "KG_Project_note/Pasted image 20250820122011.png",
+    "KG_Project_note/Pasted image 20250820121748.png",
+    "Pasted image 20250820122011.png",
+    "Pasted image 20250820121748.png",
+    "KG_Project_note/Project_KSM.md",
     "devlogs/devlog_2025-06-27.md",
     "devlogs_totalsum.md",
     "todolist.md",
